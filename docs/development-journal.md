@@ -253,13 +253,142 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 | Architecture Planning               | Completed                      |
 | Development Planning                | Completed at the overall level |
 | Stage 0 — Project Setup             | Completed                      |
-| Stage 1 — Data Layer Planning       | In Progress                    |
-| Stage 1 — Data Layer Implementation | Not Started                    |
+| Stage 1 — Data Layer Planning       | Completed                      |
+| Stage 1 — Data Layer Implementation | In Progress                    |
+| Stage 2 — Application Layer         | Not Started                    |
+| Stage 3 — Presentation Layer        | Not Started                    |
+| Stage 4 — Testing and Refinement    | Not Started                    |
 
-**Current Focus:**
+_Test references (T01, T02, ...) point to entries in [testing-journal.md](testing-journal.md)._
 
-The project is currently in Stage 1 — Data Layer Planning.
+### Completed Work
 
-The next step is to develop a detailed implementation plan covering the Task data model, Firebase configuration, SDK initialisation, Firestore data access, and testing.
+**Stage 0 — Project Setup**
 
-Detailed technical decisions will be documented as they are made during implementation planning and development.
+- Created the local TaskFlow project.
+- Configured Visual Studio Code.
+- Set up Claude Code CLI.
+- Created the initial project files.
+- Initialised Git.
+
+**Stage 1 — Data Layer Planning**
+
+- Completed the five-step Stage Implementation Planning Framework: Define the Objective, Identify Requirements, Identify Dependencies, Determine Implementation Sequence, and Define Expected Outcomes & Testing.
+- Finalised the task data model: `title` (String, required), `status` (String, required), `dueDate` (Timestamp / null, optional).
+- Confirmed the Firestore structure: collection `tasks` with auto-generated document IDs.
+
+**Stage 1 — Data Layer Implementation (in progress)**
+
+| Step | Implementation Task              | Status      | Notes                                                                                                                     |
+| ---- | -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
+| 1    | Define Data Model                | Completed   | See Stage 1 planning.                                                                                                     |
+| 2    | Create Firebase Project          | Completed   | Project named TaskFlow (project ID `taskflow-5d179`). See T01.                                                            |
+| 3    | Set Up Cloud Firestore           | Completed   | Default database created. See T02.                                                                                        |
+| 4    | Configure Security Rules         | Reviewed    | Read/write allowed until December 14, 2026; authentication not required for this demo. Actual permissions not yet tested. See T03. |
+| 5    | Initialize Firebase SDK          | Completed   | Firebase Web App registered; SDK integrated via CDN ES module imports; Firebase and Firestore initialised in `firebase.js`. See T04. |
+| 6    | Implement Data Access Operations | Not Started | Next task: create `taskService.js` (Create, Read, Update, Delete).                                                        |
+| 7    | Test Data Operations             | Not Started | Actual CRUD operations have not yet been tested.                                                                          |
+
+Stage 1 implementation must not be marked as completed until all required data access operations have been implemented and verified.
+
+**Known Minor Issue**
+
+- A `favicon.ico` 404 error appears in the browser Console. It does not affect Firebase initialisation and is non-blocking.
+
+### Next Task
+
+Create `taskService.js` and implement the Firestore data access operations: Create Task, Read Tasks, Update Task, and Delete Task.
+
+# Stage 1 — Data Layer: Implementation Planning
+
+## 1. Define the Objective
+
+Establish a reliable data storage and access foundation that allows TaskFlow to persist, retrieve, update, and delete task records using Cloud Firestore.
+
+## 2. Identify Requirements
+
+The Data Layer must support the following requirements:
+
+**Data Model**
+
+Each task will contain three fields:
+
+| Field   | Data Type        | Required | Description                      |
+| ------- | ---------------- | -------- | -------------------------------- |
+| title   | String           | Yes      | Task name                        |
+| status  | String           | Yes      | To Do, In Progress, or Completed |
+| dueDate | Timestamp / null | No       | Optional task due date           |
+
+**Database Structure**
+
+- Use Cloud Firestore as the database.
+- Create a `tasks` collection.
+- Each task will be stored as an individual document.
+- Use Firestore auto-generated document IDs.
+
+**Technical Requirements**
+
+- Firebase project configuration.
+- Cloud Firestore setup.
+- Firebase SDK integration.
+- Data access operations (CRUD).
+- Basic security rules suitable for a demonstration project.
+
+Authentication is not required for this prototype.
+
+## 3. Identify Dependencies
+
+The implementation requires the following:
+
+- A Firebase project to provide the backend environment.
+- Cloud Firestore to store task records.
+- A defined data model before implementing database operations.
+- Firebase SDK to connect the frontend application to Firestore.
+- Appropriate Firestore Security Rules to control database access.
+
+## 4. Determine Implementation Sequence
+
+The implementation will follow the sequence below, based on technical dependencies and logical order.
+
+| Step | Implementation Task              | Reason                                                                                                                 |
+| ---- | -------------------------------- | ---------------------------------------------------------------------------------------------------------------------- |
+| 1    | Define Data Model                | Establish the data structure and field requirements before creating database records and implementing data operations. |
+| 2    | Create Firebase Project          | Set up the Firebase environment that will host the database and provide the necessary project configuration.           |
+| 3    | Set Up Cloud Firestore           | Create and enable the database where task records will be stored.                                                      |
+| 4    | Configure Security Rules         | Define database access permissions before the application starts interacting with Firestore.                           |
+| 5    | Initialize Firebase SDK          | Connect the frontend application to the Firebase project and make Firestore accessible from the application.           |
+| 6    | Implement Data Access Operations | Implement Create, Read, Update, and Delete operations to allow the application to manage task records.                 |
+| 7    | Test Data Operations             | Verify that all data operations work correctly and that records are stored and updated as expected.                    |
+
+**Implementation Approach**
+
+The sequence follows the dependency direction: database preparation → application connection → data operations → verification.
+
+Some configuration tasks may be prepared in parallel, but the sequence above provides a straightforward implementation path for this project.
+
+## 5. Define Expected Outcomes & Testing
+
+Each implementation step should have a clear expected outcome and a corresponding verification method.
+
+| Implementation Task              | Expected Outcome                                                      | How to Verify                                                                     |
+| -------------------------------- | --------------------------------------------------------------------- | --------------------------------------------------------------------------------- |
+| Define Data Model                | A clearly defined task structure with three fields.                   | Review the field names, data types, and requirements against the project scope.   |
+| Create Firebase Project          | A Firebase project is successfully created.                           | Confirm the project appears in Firebase Console.                                  |
+| Set Up Cloud Firestore           | A Firestore database is successfully created and enabled.             | Check the database in Firebase Console.                                           |
+| Configure Security Rules         | Database access rules match the requirements of the demo application. | Review the rules and verify the intended read/write access.                       |
+| Initialize Firebase SDK          | The frontend can successfully initialize and connect to Firebase.     | Check for successful initialization and connection, without configuration errors. |
+| Implement Data Access Operations | All four CRUD operations are implemented.                             | Test creating, retrieving, updating, and deleting task records.                   |
+| Test Data Operations             | Task records can be managed correctly through Firestore.              | Verify that changes in the application are reflected correctly in the database.   |
+
+### Completion Criteria
+
+Stage 1 will be considered complete when:
+
+- The Firebase project and Cloud Firestore database are configured.
+- The Firebase SDK is successfully integrated.
+- All four CRUD operations work correctly.
+- Task records are stored and retrieved using the agreed data model.
+- Basic database access rules are configured and verified.
+
+**Expected Result:** A functional Data Layer that provides the storage and data access foundation for the TaskFlow application.
+
