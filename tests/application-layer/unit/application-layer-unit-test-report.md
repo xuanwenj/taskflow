@@ -1,8 +1,8 @@
 # Application Layer Unit Test Report
 
 **Component under test:** `services/taskAppService.js` (using `services/taskValidation.js`)
-**Test code:** `tests/unit/taskAppService.test.mjs`
-**Raw execution output:** `docs/tests/application-layer-unit-test-output.txt`
+**Test code:** `tests/application-layer/unit/taskAppService.test.mjs`
+**Raw execution output:** `tests/application-layer/unit/application-layer-unit-test-output.txt`
 **Execution date:** 2026-11-14
 **Environment:** Node v22.16.0, Node built-in test runner
 
@@ -11,7 +11,7 @@
 From the project root:
 
 ```
-node --experimental-test-module-mocks --test --test-reporter=spec "tests/unit/*.test.mjs"
+node --experimental-test-module-mocks --test --test-reporter=spec "tests/application-layer/unit/*.test.mjs"
 ```
 
 No Firebase credentials or network access are required.
@@ -84,6 +84,8 @@ Exit code: 0.
 To confirm the tests detect real defects, a copy of the project in a temporary directory was modified (outside the project, not committed) by removing the `dueDate` default in `createTask()` and the ID validation in `deleteTask()`. The suite then failed U03, U05, U22 and U23 (19 passed, 4 failed). The production code in the project was not changed for this check.
 
 ## Notes
+
+- On 2026-11-15 the test files were reorganised into `tests/application-layer/unit/`. The execution output file records the command and paths as they were when the tests were run (`tests/unit/`), and was left unchanged as historical evidence. The suite was re-run from the new location after the move (see the development journal).
 
 - IDs `U01`–`U23` are unit test IDs for this suite. They are separate from the `T01`–`T08` records in `testing-journal.md`, and no entries have been added to the Testing Log.
 - Node prints an `ExperimentalWarning` for module mocking. It does not affect results.

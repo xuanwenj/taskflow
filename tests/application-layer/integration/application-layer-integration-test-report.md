@@ -1,8 +1,8 @@
 # Application Layer Integration Test Report
 
 **Component under test:** Application Layer (`services/taskAppService.js`, `services/taskValidation.js`) integrated with the Data Layer (`taskService.js`) and Cloud Firestore
-**Test code:** `docs/tests/test-integration.html`, `docs/tests/test-integration.js`
-**Execution record:** `docs/tests/application-layer-integration-test-output.txt`
+**Test code:** `tests/application-layer/integration/test-integration.html`, `tests/application-layer/integration/test-integration.js`
+**Execution record:** `tests/application-layer/integration/application-layer-integration-test-output.txt`
 **Execution date:** 2026-11-14
 **Test IDs:** IT01–IT08 (separate from manual tests T01–T08 and unit tests U01–U23)
 
@@ -45,6 +45,8 @@ The test scenarios and expected results are those defined in `test-integration.j
 | Cleanup errors | 0 |
 
 ## Notes
+
+- On 2026-11-15 the test files were reorganised into `tests/application-layer/integration/`. The execution record still lists the earlier `docs/tests/` file locations, as it was written before the move, and was left unchanged as historical evidence.
 
 - The evidence is a screenshot, not a saved log file. The IT01 line is cut off at the right edge, so its dueDate detail is not visible. Its Pass status is shown on the page and in the Console table.
 - IT04 read 46 tasks, which includes unrelated existing documents. The test script does not modify those.

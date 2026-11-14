@@ -2,6 +2,8 @@
 
 Companion to [development-journal.md](development-journal.md).
 
+Test source files, suite reports, and execution outputs are stored by layer under `tests/` (see "Testing File Organisation" in the development journal).
+
 ## Testing Log
 
 Records of tests and verification activities. Entries contain actual results only. Status values: **Passed**, **Failed**, **Blocked**, **Reviewed** (configuration review, not a functional test). Test IDs are sequential (T01, T02, ...).

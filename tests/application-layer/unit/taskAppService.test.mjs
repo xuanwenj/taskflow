@@ -1,7 +1,7 @@
 // Unit tests for the Application Layer (services/taskAppService.js).
 // The real Data Layer (taskService.js) is replaced with a stub so no Firebase
 // connection is needed. Run from the project root:
-//   node --experimental-test-module-mocks --test "tests/unit/*.test.mjs"
+//   node --experimental-test-module-mocks --test "tests/application-layer/unit/*.test.mjs"
 import assert from "node:assert/strict";
 import { beforeEach, mock, test } from "node:test";
 import { pathToFileURL } from "node:url";
@@ -27,12 +27,12 @@ const dataLayerStub = {
 
 // Replace the real Data Layer before the Application Layer is imported
 mock.module(
-  pathToFileURL(new URL("../../taskService.js", import.meta.url).pathname).href,
+  pathToFileURL(new URL("../../../taskService.js", import.meta.url).pathname).href,
   { namedExports: dataLayerStub }
 );
 
 const { createTask, getTasks, updateTask, deleteTask } = await import(
-  "../../services/taskAppService.js"
+  "../../../services/taskAppService.js"
 );
 
 const dueDate = new Date("2026-12-01T00:00:00.000Z");

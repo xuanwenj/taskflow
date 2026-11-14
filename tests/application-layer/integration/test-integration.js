@@ -1,10 +1,10 @@
-import { db } from "../../firebase.js";
+import { db } from "../../../firebase.js";
 import {
   createTask,
   getTasks,
   updateTask,
   deleteTask,
-} from "../../services/taskAppService.js";
+} from "../../../services/taskAppService.js";
 import {
   collection,
   getDoc,

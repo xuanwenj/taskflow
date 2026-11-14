@@ -54,6 +54,8 @@ When a new stage begins, update the current project status accordingly without l
 
 Continue maintaining the central Testing Log in file testing-journal.md
 
+Keep test implementation files, reports, and execution outputs together in the relevant layer's directory under `tests/` (`tests/data-layer/`, `tests/application-layer/unit/`, `tests/application-layer/integration/`, `tests/presentation-layer/`). A test suite can share one report and one output file. Each implementation stage must document its test objective and scenarios, expected results, actual results, Pass / Fail / Blocked status, and evidence references where available.
+
 Record all meaningful tests performed throughout the project, including tests performed during implementation and final QA.
 
 Use sequential test IDs and record actual results.
