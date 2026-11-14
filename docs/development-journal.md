@@ -254,7 +254,7 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 | Development Planning                | Completed at the overall level |
 | Stage 0 — Project Setup             | Completed                      |
 | Stage 1 — Data Layer Planning       | Completed                      |
-| Stage 1 — Data Layer Implementation | In Progress                    |
+| Stage 1 — Data Layer Implementation | Completed                      |
 | Stage 2 — Application Layer         | Not Started                    |
 | Stage 3 — Presentation Layer        | Not Started                    |
 | Stage 4 — Testing and Refinement    | Not Started                    |
@@ -277,7 +277,7 @@ _Test references (T01, T02, ...) point to entries in [testing-journal.md](testin
 - Finalised the task data model: `title` (String, required), `status` (String, required), `dueDate` (Timestamp / null, optional).
 - Confirmed the Firestore structure: collection `tasks` with auto-generated document IDs.
 
-**Stage 1 — Data Layer Implementation (in progress)**
+**Stage 1 — Data Layer Implementation (completed)**
 
 | Step | Implementation Task              | Status      | Notes                                                                                                                     |
 | ---- | -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
@@ -286,10 +286,13 @@ _Test references (T01, T02, ...) point to entries in [testing-journal.md](testin
 | 3    | Set Up Cloud Firestore           | Completed   | Default database created. See T02.                                                                                        |
 | 4    | Configure Security Rules         | Reviewed    | Read/write allowed until December 14, 2026; authentication not required for this demo. Actual permissions not yet tested. See T03. |
 | 5    | Initialize Firebase SDK          | Completed   | Firebase Web App registered; SDK integrated via CDN ES module imports; Firebase and Firestore initialised in `firebase.js`. See T04. |
-| 6    | Implement Data Access Operations | Not Started | Next task: create `taskService.js` (Create, Read, Update, Delete).                                                        |
-| 7    | Test Data Operations             | Not Started | Actual CRUD operations have not yet been tested.                                                                          |
+| 6    | Implement Data Access Operations | Completed   | `taskService.js` implements `createTask()`, `getTasks()`, `updateTask()`, and `deleteTask()`. All four verified (T05–T08). |
+| 7    | Test Data Operations             | Completed   | Create (T05), Read (T06), Update (T07), and Delete (T08) tested and passed.                                              |
 
-Stage 1 implementation must not be marked as completed until all required data access operations have been implemented and verified.
+Stage 1 implementation is **Completed**. All four data access operations are implemented and tested (T05–T08). Per the project owner's decision, the two Completion Criteria without a dedicated test are considered satisfied by the CRUD tests:
+
+- Database access rules: reviewed (T03); read and write access confirmed in practice by T05–T08 under the current rules.
+- Agreed data model: exercised by T05–T07.
 
 **Known Minor Issue**
 
@@ -297,7 +300,7 @@ Stage 1 implementation must not be marked as completed until all required data a
 
 ### Next Task
 
-Create `taskService.js` and implement the Firestore data access operations: Create Task, Read Tasks, Update Task, and Delete Task.
+Stage 1 is complete. The next step is Stage 2 — Application Layer planning. The detailed plan will be added once it has been agreed.
 
 # Stage 1 — Data Layer: Implementation Planning
 
