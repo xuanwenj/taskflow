@@ -244,20 +244,24 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 
 ## 8. Current Project Progress
 
-| Area                                | Status                         |
-| ----------------------------------- | ------------------------------ |
-| Requirements Analysis               | Completed                      |
-| Feature Prioritisation              | Completed                      |
-| Wireframe and UI Design             | Completed                      |
-| Technology Selection                | Completed                      |
-| Architecture Planning               | Completed                      |
-| Development Planning                | Completed at the overall level |
-| Stage 0 — Project Setup             | Completed                      |
-| Stage 1 — Data Layer Planning       | Completed                      |
-| Stage 1 — Data Layer Implementation | Completed                      |
-| Stage 2 — Application Layer         | Not Started                    |
-| Stage 3 — Presentation Layer        | Not Started                    |
-| Stage 4 — Testing and Refinement    | Not Started                    |
+| Area                                       | Status                         |
+| ------------------------------------------ | ------------------------------ |
+| Requirements Analysis                      | Completed                      |
+| Feature Prioritisation                     | Completed                      |
+| Wireframe and UI Design                    | Completed                      |
+| Technology Selection                       | Completed                      |
+| Architecture Planning                      | Completed                      |
+| Development Planning                       | Completed at the overall level |
+| Stage 0 — Project Setup                    | Completed                      |
+| Stage 1 — Data Layer Planning              | Completed                      |
+| Stage 1 — Data Layer Implementation        | Completed                      |
+| Stage 2 — Application Layer Planning       | Completed                      |
+| Stage 2 — Application Layer Implementation | Completed                      |
+| Stage 2 — Application Layer Unit Testing   | Completed                      |
+| Stage 2 — Application Layer Integration Testing | Completed                  |
+| Stage 2 — Application Layer         | Completed                      |
+| Stage 3 — Presentation Layer               | Not Started                    |
+| Stage 4 — Testing and Refinement           | Not Started                    |
 
 _Test references (T01, T02, ...) point to entries in [testing-journal.md](testing-journal.md)._
 
@@ -279,20 +283,27 @@ _Test references (T01, T02, ...) point to entries in [testing-journal.md](testin
 
 **Stage 1 — Data Layer Implementation (completed)**
 
-| Step | Implementation Task              | Status      | Notes                                                                                                                     |
-| ---- | -------------------------------- | ----------- | ------------------------------------------------------------------------------------------------------------------------- |
-| 1    | Define Data Model                | Completed   | See Stage 1 planning.                                                                                                     |
-| 2    | Create Firebase Project          | Completed   | Project named TaskFlow (project ID `taskflow-5d179`). See T01.                                                            |
-| 3    | Set Up Cloud Firestore           | Completed   | Default database created. See T02.                                                                                        |
-| 4    | Configure Security Rules         | Reviewed    | Read/write allowed until December 14, 2026; authentication not required for this demo. Actual permissions not yet tested. See T03. |
-| 5    | Initialize Firebase SDK          | Completed   | Firebase Web App registered; SDK integrated via CDN ES module imports; Firebase and Firestore initialised in `firebase.js`. See T04. |
-| 6    | Implement Data Access Operations | Completed   | `taskService.js` implements `createTask()`, `getTasks()`, `updateTask()`, and `deleteTask()`. All four verified (T05–T08). |
-| 7    | Test Data Operations             | Completed   | Create (T05), Read (T06), Update (T07), and Delete (T08) tested and passed.                                              |
+| Step | Implementation Task              | Status    | Notes                                                                                                                                |
+| ---- | -------------------------------- | --------- | ------------------------------------------------------------------------------------------------------------------------------------ |
+| 1    | Define Data Model                | Completed | See Stage 1 planning.                                                                                                                |
+| 2    | Create Firebase Project          | Completed | Project named TaskFlow (project ID `taskflow-5d179`). See T01.                                                                       |
+| 3    | Set Up Cloud Firestore           | Completed | Default database created. See T02.                                                                                                   |
+| 4    | Configure Security Rules         | Reviewed  | Read/write allowed until December 14, 2026; authentication not required for this demo. Actual permissions not yet tested. See T03.   |
+| 5    | Initialize Firebase SDK          | Completed | Firebase Web App registered; SDK integrated via CDN ES module imports; Firebase and Firestore initialised in `firebase.js`. See T04. |
+| 6    | Implement Data Access Operations | Completed | `taskService.js` implements `createTask()`, `getTasks()`, `updateTask()`, and `deleteTask()`. All four verified (T05–T08).           |
+| 7    | Test Data Operations             | Completed | Create (T05), Read (T06), Update (T07), and Delete (T08) tested and passed.                                                          |
 
 Stage 1 implementation is **Completed**. All four data access operations are implemented and tested (T05–T08). Per the project owner's decision, the two Completion Criteria without a dedicated test are considered satisfied by the CRUD tests:
 
 - Database access rules: reviewed (T03); read and write access confirmed in practice by T05–T08 under the current rules.
 - Agreed data model: exercised by T05–T07.
+
+**Stage 2 — Application Layer (completed)**
+
+- Task validation (`services/taskValidation.js`) and the task application service (`services/taskAppService.js`) are implemented.
+- Unit Testing U01–U23: 23 passed, 0 failed (Stub Data Layer).
+- Integration Testing IT01–IT08: 8 passed, 0 failed, using the real Application Layer, Data Layer, and Cloud Firestore. Test documents were cleaned up successfully.
+- See "Stage 2 — Application Layer: Implementation Progress" for details.
 
 **Known Minor Issue**
 
@@ -300,7 +311,7 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 
 ### Next Task
 
-Stage 1 is complete. The next step is Stage 2 — Application Layer planning. The detailed plan will be added once it has been agreed.
+Stages 0, 1, and 2 are complete. The next stage is Stage 3 — Presentation Layer, which has not started. Its detailed implementation plan will be added once it has been agreed.
 
 # Stage 1 — Data Layer: Implementation Planning
 
@@ -395,3 +406,199 @@ Stage 1 will be considered complete when:
 
 **Expected Result:** A functional Data Layer that provides the storage and data access foundation for the TaskFlow application.
 
+---
+
+# Stage 2 — Application Layer: Implementation Planning
+
+## 1. Define the Objective
+
+Implement the application logic that validates task data, manages task status, and coordinates interactions between the Presentation Layer and Data Layer.
+
+## 2. Identify Requirements
+
+The Application Layer should provide the following capabilities:
+
+**Task Validation**
+
+- Validate that the task title is not empty.
+- Validate that the task status is one of the allowed values.
+- Validate that `dueDate` is either a valid date or `null`.
+
+**Task Operations**
+
+- Create tasks.
+- Retrieve tasks.
+- Update tasks.
+- Delete tasks.
+
+**Task Status Management**
+
+- Use only these allowed status values: To Do, In Progress, Completed.
+
+**Scope Constraint**
+
+Keep the implementation within the existing project scope. Do not introduce priority, search, filtering, notifications, authentication, multi-user functionality, or additional business rules.
+
+**Date Rule**
+
+`dueDate` must be a valid date or `null`. There is no requirement that the due date must be in the future, as this has not been agreed.
+
+## 3. Identify Dependencies
+
+The Application Layer depends on the existing Data Layer:
+
+- `firebase.js`: Firebase and Firestore initialisation.
+- `taskService.js`: Firestore CRUD operations.
+
+The Application Layer must call the Data Layer rather than accessing Firestore directly.
+
+The Presentation Layer should eventually communicate with the Application Layer, not directly with the Data Layer.
+
+No additional libraries or technologies are required.
+
+## 4. Determine Implementation Sequence
+
+| Step | Implementation Task                | Details                                                                                                                                                                                                                           |
+| ---- | ---------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| 1    | Define Task Rules                  | Define allowed task statuses. Define title validation rules. Define `dueDate` validation rules.                                                                                                                                   |
+| 2    | Implement Validation               | Create validation logic for title, status, and `dueDate`. Return or throw clear errors when data is invalid.                                                                                                                      |
+| 3    | Implement Task Application Service | Create `services/taskAppService.js`. Implement `createTask()`, `getTasks()`, `updateTask()`, and `deleteTask()`. Delegate database operations to the existing `taskService.js`. Apply validation to Create and Update operations. |
+| 4    | Test Application Layer             | Test valid task creation and updates. Test rejection of empty titles. Test rejection of invalid status values. Test rejection of invalid dates. Test Read and Delete operations through the Application Layer.                    |
+
+## 5. Define Expected Outcomes & Testing
+
+Stage 2 will be considered complete when:
+
+- Task validation works as expected.
+- Valid tasks can be created and updated.
+- Invalid task data is rejected.
+- Tasks can be retrieved and deleted through the Application Layer.
+- The Application Layer coordinates all task operations through the Data Layer.
+- The separation between Presentation, Application, and Data Layers is maintained.
+
+Testing should cover both valid and invalid inputs.
+
+## Proposed File Structure
+
+```
+TaskFlow/
+├── firebase.js
+├── taskService.js
+├── services/
+│   ├── taskAppService.js
+│   └── taskValidation.js
+├── docs/
+│   ├── development-journal.md
+│   └── tests/
+└── ...
+```
+
+**Responsibilities**
+
+- `taskService.js`: Data Layer, responsible for Firestore CRUD operations.
+- `taskValidation.js`: Application Layer validation rules.
+- `taskAppService.js`: Application Layer service, responsible for business logic and coordinating Data Layer operations.
+
+## Stage 2 Progress
+
+| Area                                | Status      |
+| ----------------------------------- | ----------- |
+| Planning                            | Completed   |
+| Implementation                      | Completed   |
+| Unit Testing                        | Completed   |
+| Integration Testing                 | Completed   |
+| **Overall Stage 2**                 | **Completed** |
+
+---
+
+# Stage 2 — Application Layer: Implementation Progress
+
+## Implementation Summary
+
+**Task Validation** — `services/taskValidation.js`
+
+- Implemented validation for title, status, and `dueDate`.
+- `validateTask()` validates complete task data.
+- `validateTaskUpdate()` validates partial updates.
+- `validateTaskId()` validates task IDs.
+- Invalid inputs, empty updates, unsupported fields, and explicitly supplied `undefined` values are rejected.
+
+**Task Application Service** — `services/taskAppService.js`
+
+- Implemented `createTask()`, `getTasks()`, `updateTask()`, and `deleteTask()`.
+- Database operations are delegated to the Data Layer (`taskService.js`).
+- Default status is `To Do` when status is omitted during creation.
+- Default `dueDate` is `null` when omitted during creation.
+- Update validates only the supplied fields and does not apply creation defaults.
+
+## Application Layer Unit Testing
+
+Unit test IDs (U01–U23) are kept separate from the manual test records (T01–T08) in [testing-journal.md](testing-journal.md).
+
+| Item                | Detail                                                                                      |
+| ------------------- | ------------------------------------------------------------------------------------------- |
+| Test IDs            | U01–U23                                                                                     |
+| Test Type           | Automated Unit Testing                                                                      |
+| Environment         | Node.js v22.16.0                                                                            |
+| Execution Date      | 2026-11-14                                                                                  |
+| Actual Result       | 23 tests passed, 0 failed                                                                   |
+| Exit Code           | 0                                                                                           |
+| Test Approach       | Node's built-in test runner; `mock.module()` replaces the real Data Layer with a Stub Data Layer |
+| Production Code     | The tests import the actual production Application Layer implementation                     |
+| Requirements        | No Firebase credentials or network connection required                                      |
+
+**Coverage**
+
+- **Create:** valid data, default values, title trimming, and invalid inputs.
+- **Read:** returning the Data Layer result.
+- **Update:** partial updates, invalid fields, empty updates, and invalid IDs.
+- **Delete:** valid and invalid task IDs.
+- Rejected inputs were verified not to trigger Data Layer calls.
+
+**Limitation:** these unit tests use a stub. Real Firebase integration testing of the Application Layer has **not** been completed.
+
+**Command to re-run the tests** (from the project root):
+
+```
+node --experimental-test-module-mocks --test --test-reporter=spec "tests/unit/*.test.mjs"
+```
+
+## Test Artifacts
+
+| File                                                   | Purpose                  |
+| ------------------------------------------------------ | ------------------------ |
+| `tests/unit/taskAppService.test.mjs`                   | Unit test source code    |
+| `docs/tests/application-layer-unit-test-report.md`     | Test report              |
+| `docs/tests/application-layer-unit-test-output.txt`    | Raw execution output     |
+
+## Test Reliability Check
+
+Separately from the official U01–U23 results, an additional experiment was performed on a copy outside the project to verify that the test suite can detect deliberately introduced defects. The `dueDate` default and the Delete ID validation were deliberately removed, and four tests failed as expected. These four experimental failures are **not** part of the official U01–U23 results, and the project code was not changed.
+
+## Application Layer Integration Testing
+
+Integration test IDs (IT01–IT08) are kept separate from T01–T08 and U01–U23.
+
+| Item           | Detail                                                                                          |
+| -------------- | ----------------------------------------------------------------------------------------------- |
+| Test IDs       | IT01–IT08                                                                                       |
+| Test Type      | Browser-based Integration Testing                                                               |
+| Execution Date | 2026-11-14                                                                                      |
+| Actual Result  | 8 passed, 0 failed                                                                              |
+| Test Approach  | The real `services/taskAppService.js`, real `taskService.js`, and the actual Cloud Firestore database; no stub or mock Data Layer |
+| Cleanup        | 3 test documents deleted during cleanup; 0 cleanup errors                                       |
+
+**Coverage:** IT01 Create Task, IT02 Default Status, IT03 Default Due Date, IT04 Read Tasks, IT05 Partial Update, IT06 Update Status, IT07 Delete Task, IT08 Invalid Task. All 8 passed.
+
+**Test artifacts**
+
+| File                                                          | Purpose                                              |
+| ------------------------------------------------------------- | ---------------------------------------------------- |
+| `docs/tests/test-integration.html`                            | Test page (run with the **Run Integration Tests** button) |
+| `docs/tests/test-integration.js`                              | Integration test source code                         |
+| `docs/tests/application-layer-integration-test-report.md`     | Test report                                          |
+| `docs/tests/application-layer-integration-test-output.txt`    | Execution record (transcribed from a screenshot of the page and Console) |
+
+## Stage 2 Completion
+
+All three Stage 2 test levels are complete: unit testing (U01–U23, 23 passed), integration testing (IT01–IT08, 8 passed), and the implementation itself. **Stage 2 — Application Layer is marked Completed.**

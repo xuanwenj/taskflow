@@ -1,0 +1,62 @@
+Command: node --experimental-test-module-mocks --test --test-reporter=spec "tests/unit/*.test.mjs"
+Executed: 2026-11-14 23:17 NZDT
+Node: v22.16.0
+
+(node:55950) ExperimentalWarning: Module mocking is an experimental feature and might change at any time
+(Use `node --trace-warnings ...` to show where the warning was created)
+✔ U01 createTask: valid task is passed to the Data Layer and its result returned (1.215792ms)
+ℹ Actual: returned "stub-task-id", payload {"title":"Write report","status":"In Progress","dueDate":"2026-12-01T00:00:00.000Z"}
+✔ U02 createTask: status defaults to 'To Do' when omitted (0.11025ms)
+ℹ Actual: payload {"title":"Write report","status":"To Do","dueDate":null}
+✔ U03 createTask: dueDate defaults to null when omitted (0.069833ms)
+ℹ Actual: payload {"title":"Write report","status":"Completed","dueDate":null}
+✔ U04 createTask: explicit null dueDate is accepted (0.40375ms)
+ℹ Actual: payload {"title":"Write report","status":"To Do","dueDate":null}
+✔ U05 createTask: title is trimmed before saving (0.27975ms)
+ℹ Actual: title saved as "Write report"
+✔ U06 createTask: empty title is rejected (0.217209ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U07 createTask: invalid status is rejected (0.118375ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U08 createTask: invalid dueDate (string) is rejected (0.103584ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U09 createTask: invalid dueDate (invalid Date object) is rejected (0.1055ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U10 getTasks: returns the Data Layer result (0.188667ms)
+ℹ Actual: returned 1 task(s), Data Layer called once
+✔ U11 updateTask: valid title-only update (0.120583ms)
+ℹ Actual: Data Layer received ["task-1",{"title":"New title"}]
+✔ U12 updateTask: valid status-only update (no default status or other fields added) (0.04575ms)
+ℹ Actual: Data Layer received ["task-1",{"status":"Completed"}]
+✔ U13 updateTask: omitting dueDate leaves it out of the update payload (0.039625ms)
+ℹ Actual: payload {"title":"New title"}
+✔ U14 updateTask: explicit null dueDate is accepted (0.04ms)
+ℹ Actual: Data Layer received ["task-1",{"dueDate":null}]
+✔ U15 updateTask: empty update is rejected (0.050291ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U16 updateTask: unsupported field is rejected (0.054875ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U17 updateTask: explicit undefined value is rejected (0.053125ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U18 updateTask: invalid status value is rejected (0.057833ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U19 updateTask: empty task ID is rejected (0.091583ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U20 updateTask: non-string task ID is rejected (0.066458ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U21 deleteTask: valid task ID is passed to the Data Layer (0.074334ms)
+ℹ Actual: Data Layer called with "task-1"
+✔ U22 deleteTask: empty task ID is rejected (0.045708ms)
+ℹ Actual: rejected, Data Layer calls = 0
+✔ U23 deleteTask: undefined task ID is rejected (0.279083ms)
+ℹ Actual: rejected, Data Layer calls = 0
+ℹ tests 23
+ℹ suites 0
+ℹ pass 23
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 59.089
+
+Exit code: 0

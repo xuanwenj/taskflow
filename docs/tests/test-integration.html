@@ -1,0 +1,21 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Application Layer Integration Test</title>
+  </head>
+  <body>
+    <h1>Application Layer Integration Test</h1>
+    <p>
+      Runs against the real Cloud Firestore database. Test documents use the
+      "IT-" title prefix and are deleted afterwards. Results are shown below and
+      in the browser Developer Tools Console.
+    </p>
+
+    <button id="run">Run Integration Tests</button>
+    <pre id="output"></pre>
+
+    <script type="module" src="test-integration.js"></script>
+  </body>
+</html>
