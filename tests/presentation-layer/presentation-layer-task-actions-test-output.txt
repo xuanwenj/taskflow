@@ -1,0 +1,83 @@
+Stage 3.3 — Create, Edit, Delete and Status Interactions: execution record
+Tests T26–T37. Date: 2026-11-15. Browser: Chrome. Page: tests/presentation-layer/test-task-actions.html
+Served with: python3 -m http.server 8000 (project root). Firestore: real database.
+Test records are titled "[TEST] ... <run id>", are created and removed only by the test run, and no
+pre-existing document was changed (checked by T37). Failure and argument tests (T34, T35) use a
+controlled stub of the Application Layer.
+
+=== Run history ===
+Run 1: 11 of 12 passed. T29 (cancel edit) FAILED:
+  "Stored task after cancel: expected {"title":...,"status":"To Do","dueDate":...}, got {"title":...,"dueDate":...,"status":"To Do"}"
+  Cause: the test's comparison helper compared JSON text, and Firestore returned the same fields in a
+  different key order on the second read. The values were identical; the fault was in the test helper.
+  Fix: the helper now compares fields in sorted order. No application code changed.
+Run 2: 12 of 12 passed. Review found that T26's "Actual" text printed counts taken after the second
+  create (Total 43→45). Fix: the text now reports the counts after the first create (test text only).
+Review of the Run 2 manual screenshot (evidence/stage33-edit-mode-before-icon-fix.jpg) found a real
+  defect that no test had caught: in edit mode the "+" icon was still shown on the "Save Changes" button
+  (app.js set .hidden as a property on an SVG element, which has no such property).
+  Fix (app.js): toggleAttribute("hidden", ...). Checks added to T28 (icon hidden in edit mode) and T29
+  (icon restored after Cancel).
+Run 3: 11 of 12 passed. T28 FAILED with "Add (+) icon display in edit mode: expected "none", got "block"".
+  The browser appeared to be serving a cached copy of the old app.js (the source on disk contained the fix).
+  After refreshing the cached files, with no code change, the same checks passed in Run 4.
+Run 4 (final): 12 of 12 passed.
+
+=== Run 4 results ===
+T26 [Pass] Create a task through the Add New Task form (real Firestore)
+  Expected: Task is stored with the entered title, status and local due date, appears in the list, cards update, form resets, success message shown; an omitted status and date use the defaults.
+  Actual: Stored "[TEST] Create Task RUN" (In Progress, 2026-12-31), shown as "Dec 31, 2026", Total 43→44, In Progress 0→1, form reset, success message "Task "[TEST] Create Task RUN" added.". Title-only task stored as To Do with null due date.
+
+T27 [Pass] Reject an empty task title (real Firestore)
+  Expected: Error message from the Application Layer, no success message, no document created, list unchanged.
+  Actual: Empty and whitespace-only titles both rejected with "Task title cannot be empty."; 45 documents before and after; rows and cards unchanged.
+
+T28 [Pass] Edit an existing task (real Firestore)
+  Expected: Pencil opens the form with current values; saving changes the title and date only (status kept) in Firestore and the list; an empty title is rejected and leaves the task unchanged; the + icon is hidden in edit mode.
+  Actual: Form prefilled (title, In Progress, 2026-07-04). Empty title rejected, record unchanged. After saving: title "[TEST] Edit Task RUN edited", due 2026-08-15, status still In Progress in Firestore; row updated; form back to add mode; "Task "[TEST] Edit Task RUN edited" updated.".
+
+T29 [Pass] Cancel an edit (real Firestore)
+  Expected: Cancel leaves the task unchanged in Firestore and the list, and returns the form to add mode.
+  Actual: Edit started, title changed, Cancel pressed: Firestore record identical before and after, original row kept, form reset to add mode, no success message.
+
+T30 [Pass] Confirm deletion (real Firestore)
+  Expected: Delete icon opens the confirmation; the task is removed only after Delete is confirmed, from Firestore and the list, and the cards update.
+  Actual: Dialog opened naming the task and the record still existed; after Delete: record gone from Firestore, row removed, Total 48→47, Completed 1→0, "Task "[TEST] Delete Task RUN" deleted.".
+
+T31 [Pass] Cancel deletion (real Firestore)
+  Expected: Cancel closes the dialog and leaves the task in Firestore and the list.
+  Actual: Dialog opened and cancelled: it closed, the Firestore record and the row remain, cards unchanged, no message.
+
+T32 [Pass] Change a task's status (real Firestore)
+  Expected: Each of the three statuses is saved, shown in the pill, and persists after reloading the page.
+  Actual: Status changed In Progress → Completed → To Do: each saved to Firestore, pill text and class updated, success message shown; "Completed" was still shown after reloading the page.
+
+T33 [Pass] Summary cards update after create, status change and delete
+  Expected: After every operation the three cards equal an independent tally of Firestore.
+  Actual: Cards matched Firestore after every step (Total/In Progress/Completed): start: 49/2/0; created: 50/2/0; In Progress: 50/3/0; Completed: 50/2/1; deleted: 49/2/0.
+
+T34 [Pass] Operation failures are not shown as successful (controlled stub)
+  Expected: For create, edit, status change and delete: error message, no success message, list and form show the stored state.
+  Actual: All four failures showed "Simulated Firestore failure" in the error style with no success wording; the failed create kept the typed title, the failed edit kept edit mode and the original row, the failed status change reverted to "In Progress", the failed delete kept the row; cards stayed 2/1/0.
+
+T35 [Pass] Operations use the Application Layer with the right arguments; layer separation (controlled stub + source check)
+  Expected: create gets title/status/local Date or null; edit sends only changed fields; status sends {status}; delete sends the id; no change makes no call; no Data Layer import.
+  Actual: Create passed title/status/local Date (2026-03-05) and null for an empty date; title-only edit sent {title}; clearing the date sent {dueDate: null}; status change sent {status}; delete sent the id; an unchanged edit made no call and showed a neutral message; app.js imports only ./taskListView.js and ./services/taskAppService.js, taskListView.js and index.html reference no Data Layer module.
+
+T36 [Pass] Layout of the new controls at desktop, tablet and mobile widths (real dashboard, no writes)
+  Expected: Edit mode and the delete dialog fit the viewport with no horizontal overflow; the status select covers its pill.
+  Actual: No overflow in edit mode or with the dialog open; Save/Cancel visible; select matches the pill: 1280px OK (dialog 420px wide); 820px OK (dialog 420px wide); 390px OK (dialog 352px wide). Edit and delete were cancelled, nothing written.
+
+T37 [Pass] Data safety and cleanup
+  Expected: Every pre-existing document is unchanged; all documents created by this run are removed; the document count equals the start.
+  Actual: 43 pre-existing documents unchanged; 6 test record(s) still present at the end of the run were removed (others were removed by the delete tests); final count 43 = start 43.
+  (Figures read from the page: 43, 6, 43, 43. The page text could not be copied in full through the browser tool.)
+
+Summary: 12 of 12 passed (Run 4).
+
+=== Regression: Stage 3.2 checks T18–T25 rerun after the Stage 3.3 changes ===
+8 of 8 passed. Firestore documents read: 43; written or deleted: 0.
+
+=== Note ===
+Each run created and removed its own [TEST] records; the collection held 43 documents at the end of every run
+(T37). The Stage 3.1 checks (T09–T17) were not rerun (they target the static mock-data page).

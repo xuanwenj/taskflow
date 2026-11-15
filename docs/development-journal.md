@@ -261,9 +261,10 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 | Stage 2 — Application Layer Integration Testing | Completed                  |
 | Stage 2 — Application Layer         | Completed                      |
 | Stage 3 — Presentation Layer Planning      | Completed                      |
-| Stage 3 — Presentation Layer Implementation | In Progress (3.1, 3.2 completed) |
+| Stage 3 — Presentation Layer Implementation | In Progress (3.1–3.3 completed) |
 | Stage 3.1 — UI Structure and Styling       | Completed                      |
 | Stage 3.2 — Task List and Application Layer Integration | Completed        |
+| Stage 3.3 — Create, Edit, Delete, and Status Interactions | Completed      |
 | Stage 4 — Testing and Refinement           | Not Started                    |
 
 _Test references (T01, T02, ...) point to entries in [testing-journal.md](testing-journal.md)._
@@ -313,7 +314,8 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 - Stage 3 planning is completed.
 - Stage 3.1 — UI Structure and Styling is completed: the static dashboard (`index.html`, `style.css`, `app.js`) with mock data follows the design reference and is responsive. Checks T09–T17 passed (see "Stage 3.1 Implementation and Testing" and the Testing Log).
 - Stage 3.2 — Task List and Application Layer Integration is completed: the dashboard loads real tasks through `getTasks()` and shows loading, empty, and error states. Checks T18–T25 passed (see "Stage 3.2 Implementation and Testing" and the Testing Log).
-- Stages 3.3 and 3.4 have not started.
+- Stage 3.3 — Create, Edit, Delete, and Status Interactions is completed: tasks can be created, edited, deleted, and have their status changed through the interface via the Application Layer. Checks T26–T37 passed (see "Stage 3.3 Implementation and Testing" and the Testing Log).
+- Stage 3.4 has not started.
 
 **Known Minor Issue**
 
@@ -321,7 +323,7 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 
 ### Next Task
 
-Stages 0, 1, and 2 are complete. Stages 3.1 and 3.2 are complete (see "Stage 3.1 Implementation and Testing" and "Stage 3.2 Implementation and Testing"). The next step is Stage 3.3 — Create, Edit, Delete, and Status Interactions, which has not started.
+Stages 0, 1, and 2 are complete. Stages 3.1, 3.2, and 3.3 are complete (see their "Implementation and Testing" sections). The next step is Stage 3.4 — Stage-Level Verification and Responsive Check, which has not started.
 
 ### Testing File Organisation
 
@@ -717,7 +719,7 @@ The sequence follows dependencies: structure and styling first, then reading dat
 | ----- | ----------------------------------------- | ------- | ---------- |
 | 3.1   | UI Structure and Styling                  | Completed (2026-11-15) | —   |
 | 3.2   | Task List and Application Layer Integration | Completed (2026-11-15) | 3.1 |
-| 3.3   | Create, Edit, Delete, and Status Interactions | Planned | 3.2    |
+| 3.3   | Create, Edit, Delete, and Status Interactions | Completed (2026-11-15) | 3.2 |
 | 3.4   | Stage-Level Verification and Responsive Check | Planned | 3.3   |
 
 ### 3.1 UI Structure and Styling
@@ -925,9 +927,9 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 | Implementation                         | In Progress           |
 | 3.1 UI Structure and Styling           | Completed             |
 | 3.2 Task List and Application Layer Integration | Completed |
-| 3.3 Create, Edit, Delete, and Status Interactions | Planned    |
+| 3.3 Create, Edit, Delete, and Status Interactions | Completed |
 | 3.4 Stage-Level Verification and Responsive Check | Planned    |
-| Testing                                | In Progress (3.1 and 3.2 tests passed) |
+| Testing                                | In Progress (3.1–3.3 tests passed) |
 
 ## Stage 3.1 Implementation and Testing
 
@@ -1023,3 +1025,50 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 - The Stage 3.1 checks (T09–T17) target the static mock-data page and no longer describe the current page; they were not rerun.
 - Responsiveness with real data (43 rows) was checked ad hoc only (no horizontal overflow at 1280, 820, and 390 px).
 - Chrome only.
+
+## Stage 3.3 Implementation and Testing
+
+**Status:** Completed (2026-11-15).
+
+**Objective:** Let the user create, edit, delete, and change the status of tasks through the interface, through the Application Layer, with feedback for each operation.
+
+**Scope:** Existing design and layout kept; no authentication, sorting, `createdAt`, search, priority, or overdue rules; the three summary cards are unchanged and calculated in the Presentation Layer. The Data Layer and Application Layer were not modified.
+
+**Implementation**
+
+- `app.js` coordinates the UI events and the Application Layer calls. It exports `initApp(doc, loadService)` and starts automatically only when the dashboard markup is present, so tests can drive it with a stub service. It imports only `./taskListView.js` and (dynamically) `./services/taskAppService.js`.
+  - **Create:** reads title, due date, and status from the form; converts the date input (YYYY-MM-DD) to a local `Date` or `null`; calls `createTask()`; the Application Layer's validation and defaults apply (an empty title is rejected with "Task title cannot be empty."). On success the form is reset, a success message is shown, and the list and cards are refreshed.
+  - **Edit:** the pencil icon puts the existing Add New Task card into "Edit Task" mode (prefilled, "Save Changes" and "Cancel", the edited row highlighted). Only the changed fields are sent to `updateTask()`; no change means no call and a neutral "No changes to save." message; Cancel leaves the task untouched.
+  - **Status change:** each status pill has an invisible native select laid over it, so the pill looks as in the reference; changing it calls `updateTask(id, { status })`, shows a message, and refreshes the cards. On failure the list is re-rendered so it shows the stored status.
+  - **Delete:** the delete icon opens an on-page `<dialog>` naming the task; only "Delete" calls `deleteTask()`; Cancel changes nothing.
+  - **Feedback:** success, error, and neutral messages in the existing `#feedback` area; error messages come from the Application Layer or the failed operation, and a failed operation never shows a success message. A form is disabled while its request is in flight.
+- `taskListView.js` still renders the list: it now renders the status select, reports edit, delete, and status-change clicks through handlers, can refresh without the loading state, and can re-render from the loaded tasks.
+- `index.html`: Save/Cancel button group and the delete dialog. `style.css`: status select overlay, edit-row highlight, secondary and danger buttons, dialog, neutral message, and small mobile adjustments.
+- Files modified: `app.js`, `taskListView.js`, `index.html`, `style.css`. No new application files.
+
+**Testing** (details in `testing-journal.md`, T26–T37)
+
+| Item           | Detail |
+| -------------- | ------ |
+| Test IDs       | T26–T37 |
+| Execution Date | 2026-11-15 |
+| Actual Result  | Run 1: 11 of 12 (T29 failed, a fault in the test's comparison helper). Run 2: 12 of 12. A manual screenshot review then found a real defect that no test caught (the "+" icon was still shown on "Save Changes" in edit mode); it was fixed and checks were added. Run 3: 11 of 12 (T28, stale browser cache of `app.js`). Run 4: 12 of 12. Regression T18–T25: 8 of 8. |
+| Real data      | Real Firestore with `[TEST]` records created and removed by each run; all 43 pre-existing documents unchanged (T37) |
+| Controlled data | Stub Application Layer for failures (T34) and for call arguments (T35) |
+
+| File                                                                     | Purpose |
+| ------------------------------------------------------------------------ | ------- |
+| `tests/presentation-layer/test-task-actions.html` / `.js`                | Test page and code (**Run Interaction Tests** button) |
+| `tests/presentation-layer/presentation-layer-task-actions-test-report.md` | Test report |
+| `tests/presentation-layer/presentation-layer-task-actions-test-output.txt` | Execution record (all four runs) |
+| `tests/presentation-layer/evidence/stage33-*.jpg`                        | Screenshots (4) |
+
+**Remaining issues and limitations**
+
+- Interactions were driven with DOM events, not a real mouse or keyboard; the native date picker and status dropdown list, the Esc key, and keyboard navigation were not tested.
+- A real network failure and a failed refresh after a successful write were not simulated.
+- Persistence was checked by an independent Firestore SDK read and a page reload, not in the Firestore Console.
+- The mobile layout of edit mode and the dialog was checked by measurements only (no screenshot).
+- The status control is an invisible select over the pill; users get no visible hint beyond the pointer cursor and the focus outline.
+- The test runs created and removed `[TEST]` records in the real database; the collection had 43 documents after each run.
+- Chrome only. The Stage 3.1 checks (T09–T17) were not rerun.

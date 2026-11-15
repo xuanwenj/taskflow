@@ -263,6 +263,47 @@ input.field::placeholder {
   background: var(--color-primary-hover);
 }
 
+.btn-primary:disabled {
+  opacity: 0.6;
+  cursor: progress;
+}
+
+.form-actions {
+  display: flex;
+  gap: 12px;
+}
+
+.btn-secondary,
+.btn-danger {
+  height: 48px;
+  padding: 0 22px;
+  border-radius: 9px;
+  font: inherit;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.btn-secondary {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--color-text);
+}
+
+.btn-secondary:hover {
+  background: var(--color-table-head);
+}
+
+.btn-danger {
+  border: 0;
+  background: var(--color-danger);
+  color: #ffffff;
+}
+
+.btn-danger:hover {
+  background: #c01717;
+}
+
 :focus-visible {
   outline: 3px solid rgba(0, 87, 249, 0.4);
   outline-offset: 2px;
@@ -279,6 +320,11 @@ input.field::placeholder {
 .feedback--success {
   background: var(--color-success-soft);
   color: var(--color-success);
+}
+
+.feedback--info {
+  background: var(--color-table-head);
+  color: var(--color-text-muted);
 }
 
 .feedback--error {
@@ -384,6 +430,31 @@ input.field::placeholder {
   color: var(--color-success);
 }
 
+/* The status can be changed through a native select laid over the pill */
+.status-control {
+  position: relative;
+  display: inline-block;
+}
+
+.status-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.status-control:focus-within {
+  outline: 3px solid rgba(0, 87, 249, 0.4);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.task-table tr.is-editing td {
+  background: var(--color-primary-soft);
+}
+
 .due-date {
   display: inline-flex;
   align-items: center;
@@ -436,6 +507,38 @@ input.field::placeholder {
 
 .icon-button--delete:hover {
   background: var(--color-danger-soft);
+}
+
+/* Delete confirmation */
+.dialog {
+  width: min(420px, calc(100vw - 32px));
+  padding: 24px;
+  border: 1px solid var(--color-card-border);
+  border-radius: 14px;
+  background: var(--color-surface);
+  color: var(--color-text);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.25);
+}
+
+.dialog::backdrop {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+.dialog h2 {
+  font-size: 22px;
+}
+
+.dialog-text {
+  margin-top: 10px;
+  color: var(--color-text-muted);
+  overflow-wrap: anywhere;
+}
+
+.dialog-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 22px;
 }
 
 /* Tablet */
@@ -523,7 +626,12 @@ input.field::placeholder {
     gap: 12px;
   }
 
-  .btn-primary {
+  .form-actions {
+    flex-direction: column-reverse;
+  }
+
+  .btn-primary,
+  .btn-secondary {
     width: 100%;
   }
 
@@ -572,6 +680,16 @@ input.field::placeholder {
     grid-area: due;
     justify-self: end;
     font-size: 15px;
+  }
+
+  .task-table tr.is-editing {
+    padding-left: 8px;
+    padding-right: 8px;
+    background: var(--color-primary-soft);
+  }
+
+  .task-table tr.is-editing td {
+    background: transparent;
   }
 
   .task-table td:nth-child(4) {

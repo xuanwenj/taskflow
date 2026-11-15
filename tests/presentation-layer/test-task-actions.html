@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stage 3.3 Task Interactions Test</title>
+    <style>
+      body { font-family: sans-serif; margin: 16px; }
+      pre { white-space: pre-wrap; background: #f4f4f4; padding: 12px; }
+      .preview { margin: 12px 0; }
+      .preview iframe { display: block; border: 2px solid #888; background: #fff; width: 1100px; height: 640px; }
+    </style>
+  </head>
+  <body>
+    <h1>Stage 3.3 Create, Edit, Delete and Status Interactions Test</h1>
+    <p>
+      Drives the real dashboard against the real Cloud Firestore database.
+      Test records are titled "[TEST] ..." with a run id, are created and removed
+      only by this run, and no existing document is changed. Failure tests use
+      a controlled stub of the Application Layer. Results are shown below and
+      in the Developer Tools Console.
+    </p>
+
+    <button id="run">Run Interaction Tests</button>
+    <pre id="output"></pre>
+    <div id="previews"></div>
+
+    <script type="module" src="test-task-actions.js"></script>
+  </body>
+</html>

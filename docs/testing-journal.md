@@ -35,6 +35,18 @@ Records of tests and verification activities. Entries contain actual results onl
 | T23 | Loading State | Browser Test (controlled source) | Passed |
 | T24 | Empty State | Browser Test (controlled source) | Passed |
 | T25 | Error State | Browser Test (controlled source) | Passed |
+| T26 | Create Task | Browser Test (real Firestore) | Passed |
+| T27 | Reject Empty Task Title | Browser Test (real Firestore) | Passed |
+| T28 | Edit Task | Browser Test (real Firestore) | Passed |
+| T29 | Cancel Edit | Browser Test (real Firestore) | Passed |
+| T30 | Confirm Deletion | Browser Test (real Firestore) | Passed |
+| T31 | Cancel Deletion | Browser Test (real Firestore) | Passed |
+| T32 | Change Task Status | Browser Test (real Firestore) | Passed |
+| T33 | Summary Cards After Changes | Browser Test (real Firestore) | Passed |
+| T34 | Operation Failures Not Shown as Success | Browser Test (controlled stub) | Passed |
+| T35 | Application Layer Calls and Layer Separation | Browser Test (stub + source check) | Passed |
+| T36 | Layout of New Controls (desktop, tablet, mobile) | Browser Test (real dashboard) | Passed |
+| T37 | Data Safety and Cleanup | Browser Test (real Firestore) | Passed |
 
 ### T01 — Firebase Project Setup
 
@@ -357,3 +369,116 @@ Tests T18–T25 were executed on 2026-11-15 in Chrome using `tests/presentation-
 - **Evidence:** `presentation-layer-task-list-test-output.txt`; `evidence/stage32-empty-and-error-states.jpg`.
 
 **Note on T09–T17:** these checks were written for the static mock-data page (12 rows, counts 12/4/5) and were not rerun after Stage 3.2; their recorded results apply to the Stage 3.1 version.
+
+## Stage 3.3 — Create, Edit, Delete and Status Interactions (Presentation Layer)
+
+Tests T26–T37 were executed on 2026-11-15 in Chrome using `tests/presentation-layer/test-task-actions.html` (served with `python3 -m http.server 8000`). T26–T33 drive the unchanged dashboard against the real Cloud Firestore database and verify the result with an independent Firestore read; T34–T35 drive the real app code with a controlled stub of the Application Layer; T36 checks the layout at 1280, 820, and 390 px; T37 checks that no pre-existing document changed. Test records are titled "[TEST] … <run id>" and are created and removed by the test run only. Files in `tests/presentation-layer/`: `test-task-actions.html/.js`, `presentation-layer-task-actions-test-report.md`, `presentation-layer-task-actions-test-output.txt`, `evidence/stage33-*.jpg` (4 screenshots).
+
+**Run history:**
+
+- **Run 1:** 11 of 12 passed. T29 failed: the test compared Firestore data as text and the key order differed between two reads (the values were identical). The comparison helper was fixed; not an application defect.
+- **Run 2:** 12 of 12 passed. T26's recorded counts were taken after a second create; the text was corrected. Reviewing the edit-mode screenshot then showed a real defect that no test had caught: the "+" icon was still shown on the "Save Changes" button (`app.js` set `.hidden` on an SVG element). Fixed with `toggleAttribute("hidden", …)`; checks added to T28 and T29.
+- **Run 3:** 11 of 12 passed. T28's new check failed because the browser appeared to serve a cached copy of the old `app.js`.
+- **Run 4 (final):** 12 of 12 passed after refreshing the cached files, with no further code change.
+- **Regression:** T18–T25 were rerun after the changes: 8 of 8 passed.
+
+### T26 — Create Task
+
+- **Type:** Browser test, real Firestore
+- **Objective / Method:** Fill the Add New Task form (title, due date, status) and submit; then submit a title only. Verify with a Firestore read.
+- **Expected Result:** Stored with the entered values and local due date, shown in the list, cards updated, form reset, success message; defaults apply when omitted.
+- **Actual Result:** Stored (In Progress, 2026-12-31), shown as "Dec 31, 2026", Total 43→44, In Progress 0→1, form reset, "added" message. A title-only task was stored as To Do with a null due date.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`; `evidence/stage33-create-success-and-failure-feedback.jpg`.
+
+### T27 — Reject Empty Task Title
+
+- **Objective / Method:** Submit an empty and a whitespace-only title.
+- **Expected Result:** Error from the Application Layer, no success message, no document created, list unchanged.
+- **Actual Result:** Both rejected with "Task title cannot be empty."; 45 documents before and after; rows and cards unchanged.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T28 — Edit Task
+
+- **Objective / Method:** Click the pencil of a test task, check the form, try an empty title, then change title and date and save.
+- **Expected Result:** Form prefilled; empty title rejected with the task unchanged; saving changes the title and date only (status kept) in Firestore and the list; form returns to add mode; the "+" icon is hidden in edit mode.
+- **Actual Result:** All as expected (title, In Progress, 2026-07-04 prefilled; saved as new title and 2026-08-15 with the status still In Progress).
+- **Status:** Passed (Run 3: failed on a stale cached `app.js`; see run history).
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`; `evidence/stage33-edit-mode.jpg`; `evidence/stage33-edit-mode-before-icon-fix.jpg` (the defect found in review).
+
+### T29 — Cancel Edit
+
+- **Objective / Method:** Start an edit, change the title, press Cancel.
+- **Expected Result:** Firestore record and list unchanged; form back to add mode; "+" icon restored.
+- **Actual Result:** Record identical before and after; original row kept; form reset; no success message.
+- **Status:** Passed (Run 1: failed because of the test's comparison helper; see run history).
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T30 — Confirm Deletion
+
+- **Objective / Method:** Click the delete icon of a test task, check the dialog, confirm.
+- **Expected Result:** Dialog first and the record still exists; after confirming it is removed from Firestore and the list; cards update; success message.
+- **Actual Result:** As expected; Total 48→47, Completed 1→0.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`; `evidence/stage33-delete-dialog.jpg`.
+
+### T31 — Cancel Deletion
+
+- **Objective / Method:** Open the dialog and press Cancel.
+- **Expected Result:** Dialog closes; record, row, and cards unchanged.
+- **Actual Result:** As expected; no message shown.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T32 — Change Task Status
+
+- **Objective / Method:** Change a test task's status through the select on its row, through each status, and reload the page.
+- **Expected Result:** Each status saved to Firestore and shown in the pill; persists after a reload.
+- **Actual Result:** In Progress → Completed → To Do all saved; pill text and class updated; "Completed" still shown after reloading.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T33 — Summary Cards After Changes
+
+- **Objective / Method:** Create, change status twice, and delete one test task, comparing the cards with an independent Firestore tally after each step.
+- **Expected Result:** Cards match every time.
+- **Actual Result:** Matched after every step (Total/In Progress/Completed): 49/2/0, 50/2/0, 50/3/0, 50/2/1, 49/2/0.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T34 — Operation Failures Not Shown as Success
+
+- **Objective / Method:** Stub Application Layer whose create, update, and delete reject; try create, edit, status change, and delete.
+- **Expected Result:** Error message, no success wording, and the list and form show the stored state.
+- **Actual Result:** All four showed the error; the failed create kept the typed title, the failed edit kept edit mode and the original row, the failed status change reverted the select, the failed delete kept the row; cards unchanged.
+- **Status:** Passed.
+- **Note:** Failures are simulated by a rejecting stub, not a real network failure.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`; `evidence/stage33-create-success-and-failure-feedback.jpg`.
+
+### T35 — Application Layer Calls and Layer Separation
+
+- **Objective / Method:** Record the calls made to a stub Application Layer; scan the Presentation Layer sources for imports.
+- **Expected Result:** Create passes title, status, and a local `Date` or `null`; edit sends only changed fields; status sends `{status}`; delete sends the id; no change makes no call; no Data Layer import.
+- **Actual Result:** As expected (including `{dueDate: null}` when a date is cleared); `app.js` imports only `./taskListView.js` and `./services/taskAppService.js`; `taskListView.js` and `index.html` reference no Data Layer module.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T36 — Layout of New Controls
+
+- **Objective / Method:** On the real dashboard at 1280, 820, and 390 px, open edit mode and the delete dialog (then cancel; nothing written) and measure.
+- **Expected Result:** No horizontal overflow; Save, Cancel, and Delete visible and not clipped; the dialog inside the viewport; the status select covers its pill.
+- **Actual Result:** All met at the three widths (dialog 420, 420, and 352 px wide).
+- **Status:** Passed.
+- **Note:** Measurements only; no mobile screenshot.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+### T37 — Data Safety and Cleanup
+
+- **Objective / Method:** Compare every pre-existing document before and after the run; remove only the test records created by the run.
+- **Expected Result:** Pre-existing documents unchanged; document count equal to the start; no test record left.
+- **Actual Result:** 43 pre-existing documents unchanged; final count 43 = start 43.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-actions-test-output.txt`.
+
+**Limitations:** interactions are driven with DOM events, not a real mouse or keyboard; the native date picker, the native status dropdown list, the Esc key, and keyboard navigation were not tested; a real network failure was not simulated; Chrome only. See the report for details.

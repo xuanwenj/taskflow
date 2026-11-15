@@ -54,9 +54,12 @@ export function countTasks(tasks) {
   };
 }
 
-// Build a view bound to a document, so it can also be tested in an iframe
-export function createTaskListView(doc = document) {
+// Build a view bound to a document, so it can also be tested in an iframe.
+// handlers: { onEdit(task), onDelete(task), onStatusChange(task, status) }
+export function createTaskListView(doc = document, handlers = {}) {
   const byId = (id) => doc.getElementById(id);
+  let tasks = [];
+  let editingId = null;
 
   function createCell(label, className) {
     const cell = doc.createElement("td");
@@ -79,6 +82,9 @@ export function createTaskListView(doc = document) {
   function createTaskRow(task) {
     const row = doc.createElement("tr");
     row.dataset.taskId = task.id;
+    if (task.id === editingId) {
+      row.classList.add("is-editing");
+    }
 
     const titleCell = createCell("Task", "task-title");
     titleCell.textContent = task.title;
@@ -87,7 +93,23 @@ export function createTaskListView(doc = document) {
     const pill = doc.createElement("span");
     pill.className = `status ${STATUS_CLASSES[task.status] ?? ""}`.trim();
     pill.textContent = task.status;
-    statusCell.append(pill);
+
+    // An invisible native select over the pill lets the status be changed in place
+    const select = doc.createElement("select");
+    select.className = "status-select";
+    select.setAttribute("aria-label", `Status: ${task.title}`);
+    for (const status of Object.keys(STATUS_CLASSES)) {
+      const option = doc.createElement("option");
+      option.value = status;
+      option.textContent = status;
+      select.append(option);
+    }
+    select.value = task.status;
+
+    const control = doc.createElement("span");
+    control.className = "status-control";
+    control.append(pill, select);
+    statusCell.append(control);
 
     const dueDate = toLocalDate(task.dueDate);
     const dueCell = createCell("Due Date");
@@ -125,27 +147,14 @@ export function createTaskListView(doc = document) {
     byId("task-rows").replaceChildren();
   }
 
-  function showTasks(tasks) {
+  function showTasks() {
     byId("list-state").hidden = true;
     byId("task-table").hidden = false;
     byId("task-rows").replaceChildren(...tasks.map(createTaskRow));
   }
 
-  // Retrieve tasks with fetchTasks() and render the matching state
-  async function load(fetchTasks) {
-    // Counts show a dash until real data arrives, so they never look like zero tasks
-    setCounts("–", "–", "–");
-    showState("loading", "Loading tasks…");
-
-    let tasks;
-    try {
-      tasks = await fetchTasks();
-    } catch (error) {
-      console.error("Could not load tasks:", error);
-      showState("error", "Could not load tasks. Please check your connection and reload the page.");
-      return;
-    }
-
+  // Render the list and counts from the tasks already loaded
+  function render() {
     const counts = countTasks(tasks);
     setCounts(counts.total, counts.inProgress, counts.completed);
 
@@ -154,8 +163,53 @@ export function createTaskListView(doc = document) {
       return;
     }
 
-    showTasks(tasks);
+    showTasks();
   }
 
-  return { load };
+  // Retrieve tasks with fetchTasks() and render the matching state.
+  // showLoading: false refreshes in place without the loading state.
+  async function load(fetchTasks, { showLoading = true } = {}) {
+    if (showLoading) {
+      // Counts show a dash until real data arrives, so they never look like zero tasks
+      setCounts("–", "–", "–");
+      showState("loading", "Loading tasks…");
+    }
+
+    try {
+      tasks = await fetchTasks();
+    } catch (error) {
+      console.error("Could not load tasks:", error);
+      showState("error", "Could not load tasks. Please check your connection and reload the page.");
+      return;
+    }
+
+    render();
+  }
+
+  // Mark the row being edited
+  function setEditing(taskId) {
+    editingId = taskId;
+    for (const row of doc.querySelectorAll("#task-rows tr")) {
+      row.classList.toggle("is-editing", row.dataset.taskId === taskId);
+    }
+  }
+
+  const findTask = (row) => tasks.find((task) => task.id === row?.dataset.taskId);
+
+  byId("task-rows").addEventListener("click", (event) => {
+    const button = event.target.closest(".icon-button");
+    const task = findTask(button?.closest("tr"));
+    if (!task) return;
+
+    if (button.classList.contains("icon-button--edit")) handlers.onEdit?.(task);
+    if (button.classList.contains("icon-button--delete")) handlers.onDelete?.(task);
+  });
+
+  byId("task-rows").addEventListener("change", (event) => {
+    const select = event.target.closest(".status-select");
+    const task = findTask(select?.closest("tr"));
+    if (task) handlers.onStatusChange?.(task, select.value);
+  });
+
+  return { load, render, setEditing };
 }
