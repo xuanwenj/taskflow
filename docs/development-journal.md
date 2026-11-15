@@ -261,10 +261,12 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 | Stage 2 — Application Layer Integration Testing | Completed                  |
 | Stage 2 — Application Layer         | Completed                      |
 | Stage 3 — Presentation Layer Planning      | Completed                      |
-| Stage 3 — Presentation Layer Implementation | In Progress (3.1–3.3 completed) |
+| Stage 3 — Presentation Layer Implementation | Completed                      |
 | Stage 3.1 — UI Structure and Styling       | Completed                      |
 | Stage 3.2 — Task List and Application Layer Integration | Completed        |
 | Stage 3.3 — Create, Edit, Delete, and Status Interactions | Completed      |
+| Stage 3.4 — Stage-Level Verification and Responsive Check | Completed      |
+| Stage 3 — Presentation Layer               | Completed                      |
 | Stage 4 — Testing and Refinement           | Not Started                    |
 
 _Test references (T01, T02, ...) point to entries in [testing-journal.md](testing-journal.md)._
@@ -309,13 +311,14 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 - Integration Testing IT01–IT08: 8 passed, 0 failed, using the real Application Layer, Data Layer, and Cloud Firestore. Test documents were cleaned up successfully.
 - See "Stage 2 — Application Layer: Implementation Progress" for details.
 
-**Stage 3 — Presentation Layer (in progress)**
+**Stage 3 — Presentation Layer (completed)**
 
 - Stage 3 planning is completed.
 - Stage 3.1 — UI Structure and Styling is completed: the static dashboard (`index.html`, `style.css`, `app.js`) with mock data follows the design reference and is responsive. Checks T09–T17 passed (see "Stage 3.1 Implementation and Testing" and the Testing Log).
 - Stage 3.2 — Task List and Application Layer Integration is completed: the dashboard loads real tasks through `getTasks()` and shows loading, empty, and error states. Checks T18–T25 passed (see "Stage 3.2 Implementation and Testing" and the Testing Log).
 - Stage 3.3 — Create, Edit, Delete, and Status Interactions is completed: tasks can be created, edited, deleted, and have their status changed through the interface via the Application Layer. Checks T26–T37 passed (see "Stage 3.3 Implementation and Testing" and the Testing Log).
-- Stage 3.4 has not started.
+- Stage 3.4 — Stage-Level Verification and Responsive Check is completed: final manual verification of the full workflow and the three responsive layouts passed with no issues identified (see "Stage 3.4 Final Manual Verification" and the Testing Log).
+- Stage 3 is complete.
 
 **Known Minor Issue**
 
@@ -323,7 +326,7 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 
 ### Next Task
 
-Stages 0, 1, and 2 are complete. Stages 3.1, 3.2, and 3.3 are complete (see their "Implementation and Testing" sections). The next step is Stage 3.4 — Stage-Level Verification and Responsive Check, which has not started.
+Stages 0, 1, 2, and 3 are complete (Stage 3.1–3.3: see their "Implementation and Testing" sections; Stage 3.4: see "Stage 3.4 Final Manual Verification"). The next stage in the roadmap is Stage 4 — Testing and Refinement, which has not started and has no agreed plan yet.
 
 ### Testing File Organisation
 
@@ -720,7 +723,7 @@ The sequence follows dependencies: structure and styling first, then reading dat
 | 3.1   | UI Structure and Styling                  | Completed (2026-11-15) | —   |
 | 3.2   | Task List and Application Layer Integration | Completed (2026-11-15) | 3.1 |
 | 3.3   | Create, Edit, Delete, and Status Interactions | Completed (2026-11-15) | 3.2 |
-| 3.4   | Stage-Level Verification and Responsive Check | Planned | 3.3   |
+| 3.4   | Stage-Level Verification and Responsive Check | Completed (2026-11-15) | 3.3 |
 
 ### 3.1 UI Structure and Styling
 
@@ -924,12 +927,12 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 | Area                                   | Status                |
 | -------------------------------------- | --------------------- |
 | Planning                               | Completed             |
-| Implementation                         | In Progress           |
+| Implementation                         | Completed             |
 | 3.1 UI Structure and Styling           | Completed             |
 | 3.2 Task List and Application Layer Integration | Completed |
 | 3.3 Create, Edit, Delete, and Status Interactions | Completed |
-| 3.4 Stage-Level Verification and Responsive Check | Planned    |
-| Testing                                | In Progress (3.1–3.3 tests passed) |
+| 3.4 Stage-Level Verification and Responsive Check | Completed |
+| Testing                                | Completed (3.1–3.3 tests passed; 3.4 manual verification passed) |
 
 ## Stage 3.1 Implementation and Testing
 
@@ -1072,3 +1075,21 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 - The status control is an invisible select over the pill; users get no visible hint beyond the pointer cursor and the focus outline.
 - The test runs created and removed `[TEST]` records in the real database; the collection had 43 documents after each run.
 - Chrome only. The Stage 3.1 checks (T09–T17) were not rerun.
+
+## Stage 3.4 Final Manual Verification
+
+**Status:** Completed (recorded 2026-11-15).
+
+**Purpose:** Confirm, by manual testing of the finished application, that the complete task management workflow works end to end, that the layout works at the three target widths, and that the three-layer architecture and the agreed scope are intact (see "3.4 Stage-Level Verification and Responsive Check" in the Stage 3 plan).
+
+**Outcome:** The manual verification was performed by the project owner. All checks passed and no issues were identified. No application code was changed in this stage, and no automated tests were added or rerun; it is a manual verification stage only.
+
+**Verified**
+
+- Full workflow: the application loads and shows the task list and summary cards; creating a task; changing a task's status; editing a task's title and due date; refreshing the page preserves the updated data; deleting a task; the task list and summary cards update correctly after the operations.
+- Responsive layout verified at 1280 px (desktop), 820 px (tablet), and 390 px (mobile).
+- Final review: the application works as expected as a complete user-facing application; the three-layer architecture remains intact; the implementation remains within the agreed project scope.
+
+**Records:** The manual verification is recorded in `testing-journal.md` ("Stage 3.4 — Final Manual Verification"). No test ID, screenshot, or other evidence file was provided for this stage, so none is recorded. Earlier test evidence (T09–T37) is unchanged.
+
+**Stage 3 outcome:** With Stages 3.1–3.4 completed, Stage 3 — Presentation Layer is complete. Stage 4 — Testing and Refinement has not started.

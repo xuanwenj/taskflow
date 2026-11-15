@@ -47,6 +47,7 @@ Records of tests and verification activities. Entries contain actual results onl
 | T35 | Application Layer Calls and Layer Separation | Browser Test (stub + source check) | Passed |
 | T36 | Layout of New Controls (desktop, tablet, mobile) | Browser Test (real dashboard) | Passed |
 | T37 | Data Safety and Cleanup | Browser Test (real Firestore) | Passed |
+| —   | Stage 3.4 Final Manual Verification (no test ID assigned) | Manual Verification | Passed |
 
 ### T01 — Firebase Project Setup
 
@@ -482,3 +483,29 @@ Tests T26–T37 were executed on 2026-11-15 in Chrome using `tests/presentation-
 - **Evidence:** `presentation-layer-task-actions-test-output.txt`.
 
 **Limitations:** interactions are driven with DOM events, not a real mouse or keyboard; the native date picker, the native status dropdown list, the Esc key, and keyboard navigation were not tested; a real network failure was not simulated; Chrome only. See the report for details.
+
+## Stage 3.4 — Final Manual Verification (Presentation Layer)
+
+- **Type:** Manual final verification, performed by the project owner (recorded 2026-11-15).
+- **Test ID:** none assigned. No screenshots or other evidence files were provided for this verification, so none are recorded.
+- **Environment:** the finished application in the browser, against the real Cloud Firestore database. Viewport sizes checked: 1280 px (desktop), 820 px (tablet), and 390 px (mobile). No other environment details were provided.
+- **Objective:** Confirm that the complete application works as a user-facing application, that the layout works at the three target widths, and that the architecture and scope are intact.
+
+| Scenario | Expected Result | Actual Result | Status |
+| -------- | --------------- | ------------- | ------ |
+| Application loads | The task list and summary cards are displayed | As expected | Passed |
+| Create a task | The task is created | As expected | Passed |
+| Change a task's status | The status changes | As expected | Passed |
+| Edit a task's title and due date | The title and due date change | As expected | Passed |
+| Refresh the page | The updated task data is preserved | As expected | Passed |
+| Delete a task | The task is deleted | As expected | Passed |
+| Task list and summary cards after operations | Both update correctly after each operation | As expected | Passed |
+| Desktop layout (1280 px) | The layout works | As expected | Passed |
+| Tablet layout (820 px) | The layout works | As expected | Passed |
+| Mobile layout (390 px) | The layout works | As expected | Passed |
+| Final review: complete application | Works as expected as a complete user-facing application | As expected | Passed |
+| Final review: architecture | The three-layer architecture remains intact | As expected | Passed |
+| Final review: scope | The implementation remains within the agreed project scope | As expected | Passed |
+
+- **Overall result:** All checks passed. No issues were identified.
+- **Note:** Previously recorded optional limitations (for example, Chrome-only automated checks and the untested Esc key and keyboard navigation) are not requirements of this verification and are not recorded as unresolved by it. The automated test suites (T09–T37) were not rerun.
