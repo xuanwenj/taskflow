@@ -1,0 +1,61 @@
+Stage 3.2 — Task List and Application Layer Integration: execution record
+Tests T18–T25. Date: 2026-11-15. Browser: Chrome. Page: tests/presentation-layer/test-task-list.html
+Served with: python3 -m http.server 8000 (project root). Firestore: real database, read-only
+(documents read: 43; created, changed or deleted: 0).
+
+=== Run 1 ===
+Result: 8 of 8 passed (T18–T25). Review finding after the run:
+The real Firestore data holds only "To Do" tasks and every due date is null (43 of 43), so
+Run 1 did not exercise dated rows or the In Progress / Completed statuses:
+  T20 Actual (Run 1): All rows match: To Do 43, In Progress 0, Completed 0.
+  T21 Actual (Run 1): 0 dated and 43 null due dates match the stored data.
+  T22 Actual (Run 1): Real cards 43 / 0 / 0 (To Do 43) match Firestore. Controlled data gives cards 5 / 1 / 2.
+These passes were therefore weaker than their expected results suggested. Action: T20 and T21
+were extended with controlled tasks (real Firestore Timestamp objects, a Date, null, a missing
+value, and all three statuses). No application code was changed. The harness only was changed.
+
+=== Run 2 (after extending T20 and T21) ===
+T18 [Pass] Real tasks are loaded through the Application Layer and displayed
+  Expected: One row per stored task (same ids) from getTasks(); only the Application Layer is imported by the Presentation Layer.
+  Actual: 43 rows shown for 43 stored tasks, ids identical; app.js imports ./taskListView.js, ./services/taskAppService.js; taskListView.js has no imports; no Firestore or Data Layer module referenced by the Presentation Layer.
+
+T19 [Pass] Task titles are rendered correctly
+  Expected: Each row shows exactly the stored title of its task.
+  Actual: 43 titles match the stored titles exactly.
+
+T20 [Pass] Task statuses are rendered with the correct status indicator
+  Expected: Each row shows the stored status text with the matching status class.
+  Actual: Real data (43 rows) all match: To Do 43, In Progress 0, Completed 0. The real data holds only To Do tasks, so In Progress and Completed were verified with controlled tasks: correct text, class and three distinct colours.
+
+T21 [Pass] Due dates are rendered, and a null due date shows 'No due date'
+  Expected: Dates shown as 'Mon D, YYYY' (local date); 'No due date' where dueDate is null.
+  Actual: Real data: 0 dated and 43 null due dates match the stored data (the real data has no dated tasks). Controlled tasks: Timestamp 20 Jun 2026 shown as "Jun 20, 2026", Date 31 Dec 2026 as "Dec 31, 2026", null and missing as "No due date".
+
+T22 [Pass] Summary cards are calculated from the loaded tasks
+  Expected: Total, In Progress and Completed cards equal the counts in Firestore; To Do (not a card) is the remainder; controlled data gives known counts.
+  Actual: Real cards 43 / 0 / 0 (To Do 43) match Firestore. Controlled data (2 To Do, 1 In Progress, 2 Completed) gives cards 5 / 1 / 2.
+
+T23 [Pass] Loading state is shown while tasks are being retrieved
+  Expected: Loading message and no rows while pending; page stays responsive; list appears when resolved.
+  Actual: Loading message shown with no rows, table hidden and counts as dashes; 14 timer ticks and typing worked during the wait; after resolving, the loading message was removed and 5 rows shown.
+  (Run 1: 15 timer ticks.)
+
+T24 [Pass] Empty state is shown when getTasks() returns an empty array
+  Expected: Empty message (not the error style), no rows, table hidden, counts 0.
+  Actual: Message "No tasks yet. Add your first task above." shown, table hidden, counts 0 / 0 / 0, no error styling.
+
+T25 [Pass] Error state is shown when task loading fails, and is not shown as empty
+  Expected: Error message and style, no rows, counts not 0; different from the empty state; a synchronous failure is handled the same way.
+  Actual: Error message "Could not load tasks. Please check your connection and reload the page." with error styling, no rows, table hidden, counts as dashes (not 0); a synchronous failure gives the same error state.
+
+Summary: 8 of 8 passed. Firestore documents read: 43; written or deleted: 0.
+
+=== Additional observation (ad hoc, run from the Console, not a numbered test) ===
+Real dashboard in iframes, real data (43 rows):
+  1280 px: 43 rows, no horizontal overflow, table display: table
+   820 px: 43 rows, no horizontal overflow, table display: table
+   390 px: 43 rows, no horizontal overflow, table display: block (card layout)
+
+=== Note ===
+The Stage 3.1 checks (T09–T17, test-ui-structure.html) were written for the static mock-data page
+(12 rows, counts 12/4/5) and were not rerun. They no longer describe the current page.

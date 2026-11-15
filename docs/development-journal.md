@@ -261,8 +261,9 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 | Stage 2 — Application Layer Integration Testing | Completed                  |
 | Stage 2 — Application Layer         | Completed                      |
 | Stage 3 — Presentation Layer Planning      | Completed                      |
-| Stage 3 — Presentation Layer Implementation | In Progress (3.1 completed)   |
+| Stage 3 — Presentation Layer Implementation | In Progress (3.1, 3.2 completed) |
 | Stage 3.1 — UI Structure and Styling       | Completed                      |
+| Stage 3.2 — Task List and Application Layer Integration | Completed        |
 | Stage 4 — Testing and Refinement           | Not Started                    |
 
 _Test references (T01, T02, ...) point to entries in [testing-journal.md](testing-journal.md)._
@@ -311,7 +312,8 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 
 - Stage 3 planning is completed.
 - Stage 3.1 — UI Structure and Styling is completed: the static dashboard (`index.html`, `style.css`, `app.js`) with mock data follows the design reference and is responsive. Checks T09–T17 passed (see "Stage 3.1 Implementation and Testing" and the Testing Log).
-- Stages 3.2, 3.3, and 3.4 have not started.
+- Stage 3.2 — Task List and Application Layer Integration is completed: the dashboard loads real tasks through `getTasks()` and shows loading, empty, and error states. Checks T18–T25 passed (see "Stage 3.2 Implementation and Testing" and the Testing Log).
+- Stages 3.3 and 3.4 have not started.
 
 **Known Minor Issue**
 
@@ -319,7 +321,7 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 
 ### Next Task
 
-Stages 0, 1, and 2 are complete. Stage 3.1 — UI Structure and Styling is complete (see "Stage 3.1 Implementation and Testing"). The next step is Stage 3.2 — Task List and Application Layer Integration, which has not started.
+Stages 0, 1, and 2 are complete. Stages 3.1 and 3.2 are complete (see "Stage 3.1 Implementation and Testing" and "Stage 3.2 Implementation and Testing"). The next step is Stage 3.3 — Create, Edit, Delete, and Status Interactions, which has not started.
 
 ### Testing File Organisation
 
@@ -714,7 +716,7 @@ The sequence follows dependencies: structure and styling first, then reading dat
 | Order | Implementation Stage                      | Status  | Depends On |
 | ----- | ----------------------------------------- | ------- | ---------- |
 | 3.1   | UI Structure and Styling                  | Completed (2026-11-15) | —   |
-| 3.2   | Task List and Application Layer Integration | Planned | 3.1        |
+| 3.2   | Task List and Application Layer Integration | Completed (2026-11-15) | 3.1 |
 | 3.3   | Create, Edit, Delete, and Status Interactions | Planned | 3.2    |
 | 3.4   | Stage-Level Verification and Responsive Check | Planned | 3.3   |
 
@@ -922,10 +924,10 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 | Planning                               | Completed             |
 | Implementation                         | In Progress           |
 | 3.1 UI Structure and Styling           | Completed             |
-| 3.2 Task List and Application Layer Integration | Planned      |
+| 3.2 Task List and Application Layer Integration | Completed |
 | 3.3 Create, Edit, Delete, and Status Interactions | Planned    |
 | 3.4 Stage-Level Verification and Responsive Check | Planned    |
-| Testing                                | In Progress (3.1 tests passed) |
+| Testing                                | In Progress (3.1 and 3.2 tests passed) |
 
 ## Stage 3.1 Implementation and Testing
 
@@ -967,7 +969,7 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 | `tests/presentation-layer/presentation-layer-ui-test-output.txt`  | Execution record (both runs) |
 | `tests/presentation-layer/evidence/`                              | Screenshots |
 
-**Completion:** Stage 3.1 is marked Completed because T09–T16 passed in the final run (8 of 8) and T17 passed with the noted differences. The next task is Stage 3.2 — Task List and Application Layer Integration, which remains Planned together with 3.3 and 3.4.
+**Completion:** Stage 3.1 is marked Completed because T09–T16 passed in the final run (8 of 8) and T17 passed with the noted differences. The next task is Stage 3.2 — Task List and Application Layer Integration, which has since been completed (see below); 3.3 and 3.4 remain Planned.
 
 **Remaining issues and limitations**
 
@@ -977,3 +979,47 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 - The due date field switches from text to a date picker on focus; the native picker was not checked in other browsers.
 - Keyboard navigation and screen reader behaviour were not formally tested.
 - `app.js` no longer prints the Firebase initialisation message used in T04. `firebase.js` is unchanged, and the Data Layer test pages in `tests/data-layer/` are unaffected.
+
+## Stage 3.2 Implementation and Testing
+
+**Status:** Completed (2026-11-15).
+
+**Objective:** Replace the Stage 3.1 mock data with real tasks from Cloud Firestore, retrieved through the Application Layer (`getTasks()`), with loading, empty, and error states.
+
+**Scope:** Task list, summary cards, and feedback states only. No create, edit, delete, or status operations (Stage 3.3). The Data Layer and Application Layer were not modified.
+
+**Implementation**
+
+- `app.js`: no longer holds mock data. It loads `services/taskAppService.js` with a dynamic `import()` inside the loader and calls `getTasks()`, so a failure to load the module also shows the error state. It does not import `taskService.js` or `firebase.js`.
+- `taskListView.js` (new, Presentation Layer, no imports): renders rows, converts the stored due date (Firestore Timestamp, Date, or null) to a local date, formats it as "Mon D, YYYY" or "No due date", calculates the counts, and shows the loading, empty, and error states. The 3.1 rendering code moved here; the design is unchanged.
+- Summary cards: Total, In Progress, and Completed are calculated from the loaded tasks (the To Do count is also calculated; the reference design has no To Do card, so none was added). While loading and after an error the cards show a dash, so they never look like zero tasks.
+- States: loading ("Loading tasks…" with a spinner), empty ("No tasks yet. Add your first task above."), and error (red message). Empty is shown only when `getTasks()` succeeds with an empty array; a rejection always gives the error state.
+- `index.html` (table gets `id="task-table"` and starts hidden) and `style.css` (`[hidden]` rule, loading spinner) received small changes.
+- List order: no sorting (the order returned by `getTasks()`), as decided.
+
+**Testing** (details in `testing-journal.md`, T18–T25)
+
+| Item           | Detail |
+| -------------- | ------ |
+| Test IDs       | T18–T25 |
+| Execution Date | 2026-11-15 |
+| Actual Result  | Run 1: 8 of 8 passed, but the real data (43 tasks, all To Do, all without due date) did not cover dated rows or other statuses. T20 and T21 were extended with controlled tasks; Run 2: 8 of 8 passed. |
+| Real data      | Read-only: 43 documents read, none created, changed, or deleted |
+| Controlled data | Stubs for loading, empty, and error states; controlled tasks for In Progress, Completed, and dated rows |
+
+| File                                                                    | Purpose |
+| ----------------------------------------------------------------------- | ------- |
+| `tests/presentation-layer/test-task-list.html` / `.js`                  | Test page and code (**Run Task List Tests** button) |
+| `tests/presentation-layer/presentation-layer-task-list-test-report.md`  | Test report |
+| `tests/presentation-layer/presentation-layer-task-list-test-output.txt` | Execution record (both runs) |
+| `tests/presentation-layer/evidence/stage32-*.jpg`                       | Screenshots (3) |
+
+**Remaining issues and limitations**
+
+- Real Firestore data has only To Do tasks with null due dates, so In Progress, Completed, and dated rows were verified with controlled data (including real Firestore `Timestamp` objects), not stored records.
+- The loading state was tested with a pending stub, not network throttling; the real network-failure path and a failed module import were not simulated.
+- The 43 existing records include test records from earlier stages and appear in the list; no records were deleted.
+- Stored dates are displayed as local dates; a date stored as UTC midnight may show as the previous day in time zones behind UTC (not tested).
+- The Stage 3.1 checks (T09–T17) target the static mock-data page and no longer describe the current page; they were not rerun.
+- Responsiveness with real data (43 rows) was checked ad hoc only (no horizontal overflow at 1280, 820, and 390 px).
+- Chrome only.

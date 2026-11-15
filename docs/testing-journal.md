@@ -27,6 +27,14 @@ Records of tests and verification activities. Entries contain actual results onl
 | T15 | Feedback Containers | Automated DOM Check | Passed |
 | T16 | No Firestore or Data Layer Access | Automated Check | Passed |
 | T17 | Visual Comparison with Design Reference | Manual Visual Review | Passed (with noted differences) |
+| T18 | Real Task Loading via Application Layer | Browser Test (real Firestore, read-only) | Passed |
+| T19 | Task Title Rendering | Browser Test (real Firestore, read-only) | Passed |
+| T20 | Task Status Rendering | Browser Test (real + controlled data) | Passed (controlled data for 2 of 3 statuses) |
+| T21 | Due Date Rendering (incl. null) | Browser Test (real + controlled data) | Passed (controlled data for dated rows) |
+| T22 | Summary Card Calculations | Browser Test (real + controlled data) | Passed |
+| T23 | Loading State | Browser Test (controlled source) | Passed |
+| T24 | Empty State | Browser Test (controlled source) | Passed |
+| T25 | Error State | Browser Test (controlled source) | Passed |
 
 ### T01 — Firebase Project Setup
 
@@ -273,3 +281,79 @@ Tests T09–T17 were executed on 2026-11-15 against the static dashboard (`index
 - **Status:** Passed (with noted differences).
 - **Note:** This is a visual judgement, not a pixel comparison.
 - **Evidence:** `evidence/dashboard-desktop.jpg`.
+
+## Stage 3.2 — Task List and Application Layer Integration (Presentation Layer)
+
+Tests T18–T25 were executed on 2026-11-15 in Chrome using `tests/presentation-layer/test-task-list.html` (served with `python3 -m http.server 8000`). T18–T22 load the unchanged dashboard against the real Cloud Firestore data and compare it with an independent read-only Firestore query (43 documents read; none created, changed, or deleted). T23–T25 drive the real view with controlled task sources. Files in `tests/presentation-layer/`: `test-task-list.html/.js`, `presentation-layer-task-list-test-report.md`, `presentation-layer-task-list-test-output.txt`, and `evidence/stage32-*.jpg`.
+
+**Run history:** Run 1: 8 of 8 passed. Review finding: the real data holds only To Do tasks with null due dates (43 of 43), so T20–T22 had not seen In Progress, Completed, or dated tasks in real data. T20 and T21 were extended with controlled tasks (real `Timestamp` objects, a `Date`, null, missing, all three statuses) and rerun. Run 2: 8 of 8 passed. No application code changed between runs.
+
+### T18 — Real Task Loading through the Application Layer
+
+- **Type:** Browser test, real Firestore (read-only)
+- **Objective:** Verify that tasks are loaded through `getTasks()` and that the Presentation Layer imports only the Application Layer.
+- **Method:** Load `index.html`; compare displayed task ids with a direct Firestore read; read the import statements of `app.js` and `taskListView.js`.
+- **Expected Result:** One row per stored task with identical ids; no Data Layer import.
+- **Actual Result:** 43 rows for 43 stored tasks, ids identical; `app.js` imports `./taskListView.js` and `./services/taskAppService.js` only; `taskListView.js` has no imports.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-list-test-output.txt`; `evidence/stage32-real-dashboard-desktop.jpg`.
+
+### T19 — Task Title Rendering
+
+- **Objective / Method:** Compare each row's title with the stored title (real data).
+- **Expected Result:** Exact match.
+- **Actual Result:** 43 of 43 titles match exactly.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-list-test-output.txt`.
+
+### T20 — Task Status Rendering
+
+- **Objective / Method:** Compare each row's status text and status class with the stored status; check the other statuses with controlled tasks.
+- **Expected Result:** Correct text and class for each status.
+- **Actual Result:** Real data: 43 To Do, all match. The real data has no In Progress or Completed task, so those were verified with controlled tasks: correct text and class, three distinct colours.
+- **Status:** Passed (controlled data for In Progress and Completed).
+- **Evidence:** `presentation-layer-task-list-test-output.txt` (Run 1 and Run 2).
+
+### T21 — Due Date Rendering, Including Null Due Dates
+
+- **Objective / Method:** Compare displayed due dates with the stored Timestamps; check dated cases with controlled tasks.
+- **Expected Result:** "Mon D, YYYY" (local date) or "No due date".
+- **Actual Result:** Real data: all 43 are null and show "No due date". Controlled: Timestamp 20 Jun 2026 → "Jun 20, 2026"; Date 31 Dec 2026 → "Dec 31, 2026"; null and missing → "No due date".
+- **Status:** Passed (controlled data for dated rows).
+- **Evidence:** `presentation-layer-task-list-test-output.txt`.
+
+### T22 — Summary Card Calculations
+
+- **Objective / Method:** Compare the cards with Firestore tallies; check controlled data with known counts.
+- **Expected Result:** Cards equal the counts of the loaded tasks.
+- **Actual Result:** Real: 43 / 0 / 0 (To Do 43) match Firestore. Controlled (2 To Do, 1 In Progress, 2 Completed): cards 5 / 1 / 2. The design has no To Do card; the To Do count is calculated and checked only.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-list-test-output.txt`.
+
+### T23 — Loading State
+
+- **Objective / Method:** Drive the view with a task source that stays pending, check the page, then resolve it.
+- **Expected Result:** Loading message, no rows, page stays responsive, message removed after loading.
+- **Actual Result:** Loading message shown, no rows, table hidden, counts as dashes; 14 timer ticks in 300 ms and typing worked during the wait; after resolving, 5 rows were shown and the message removed.
+- **Status:** Passed.
+- **Note:** Not tested with network throttling on the real page.
+- **Evidence:** `presentation-layer-task-list-test-output.txt`; `evidence/stage32-loading-empty-error-states.jpg`.
+
+### T24 — Empty State
+
+- **Objective / Method:** Source returns an empty array.
+- **Expected Result:** Empty message without error styling; no rows; counts 0.
+- **Actual Result:** "No tasks yet. Add your first task above."; table hidden; counts 0 / 0 / 0; no error styling.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-task-list-test-output.txt`; `evidence/stage32-empty-and-error-states.jpg`.
+
+### T25 — Error State
+
+- **Objective / Method:** Source rejects (and, separately, throws synchronously).
+- **Expected Result:** Error message and styling, not shown as empty, counts not 0.
+- **Actual Result:** "Could not load tasks. Please check your connection and reload the page." with error styling; no rows; table hidden; counts as dashes; the synchronous failure gave the same state.
+- **Status:** Passed.
+- **Note:** A real network failure and a failed module import were not simulated.
+- **Evidence:** `presentation-layer-task-list-test-output.txt`; `evidence/stage32-empty-and-error-states.jpg`.
+
+**Note on T09–T17:** these checks were written for the static mock-data page (12 rows, counts 12/4/5) and were not rerun after Stage 3.2; their recorded results apply to the Stage 3.1 version.

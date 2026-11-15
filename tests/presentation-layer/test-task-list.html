@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stage 3.2 Task List Test</title>
+    <style>
+      body { font-family: sans-serif; margin: 16px; }
+      pre { white-space: pre-wrap; background: #f4f4f4; padding: 12px; }
+      .preview { margin: 16px 0; }
+      .preview iframe { display: block; border: 2px solid #888; background: #fff; width: 1100px; height: 700px; }
+    </style>
+  </head>
+  <body>
+    <h1>Stage 3.2 Task List and Application Layer Integration Test</h1>
+    <p>
+      T18–T22 load the real dashboard against the real Cloud Firestore data
+      (read-only; nothing is created, changed, or deleted) and compare it with
+      a direct Firestore read. T23–T25 use controlled stub task sources.
+      Results are shown below and in the Developer Tools Console.
+    </p>
+
+    <button id="run">Run Task List Tests</button>
+    <pre id="output"></pre>
+    <div id="previews"></div>
+
+    <script type="module" src="test-task-list.js"></script>
+  </body>
+</html>
