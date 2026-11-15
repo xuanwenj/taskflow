@@ -261,7 +261,8 @@ _Note: UI development can begin earlier where appropriate. Integration with the 
 | Stage 2 — Application Layer Integration Testing | Completed                  |
 | Stage 2 — Application Layer         | Completed                      |
 | Stage 3 — Presentation Layer Planning      | Completed                      |
-| Stage 3 — Presentation Layer Implementation | Not Started                   |
+| Stage 3 — Presentation Layer Implementation | In Progress (3.1 completed)   |
+| Stage 3.1 — UI Structure and Styling       | Completed                      |
 | Stage 4 — Testing and Refinement           | Not Started                    |
 
 _Test references (T01, T02, ...) point to entries in [testing-journal.md](testing-journal.md)._
@@ -306,13 +307,19 @@ Stage 1 implementation is **Completed**. All four data access operations are imp
 - Integration Testing IT01–IT08: 8 passed, 0 failed, using the real Application Layer, Data Layer, and Cloud Firestore. Test documents were cleaned up successfully.
 - See "Stage 2 — Application Layer: Implementation Progress" for details.
 
+**Stage 3 — Presentation Layer (in progress)**
+
+- Stage 3 planning is completed.
+- Stage 3.1 — UI Structure and Styling is completed: the static dashboard (`index.html`, `style.css`, `app.js`) with mock data follows the design reference and is responsive. Checks T09–T17 passed (see "Stage 3.1 Implementation and Testing" and the Testing Log).
+- Stages 3.2, 3.3, and 3.4 have not started.
+
 **Known Minor Issue**
 
 - A `favicon.ico` 404 error appears in the browser Console. It does not affect Firebase initialisation and is non-blocking.
 
 ### Next Task
 
-Stages 0, 1, and 2 are complete. Stage 3 — Presentation Layer planning is complete (see "Stage 3 — Presentation Layer: Implementation Planning"). The next step is Stage 3.1 — UI Structure and Styling, using the official design reference. Stage 3 implementation has not started.
+Stages 0, 1, and 2 are complete. Stage 3.1 — UI Structure and Styling is complete (see "Stage 3.1 Implementation and Testing"). The next step is Stage 3.2 — Task List and Application Layer Integration, which has not started.
 
 ### Testing File Organisation
 
@@ -324,7 +331,7 @@ tests/
 ├── application-layer/
 │   ├── unit/                   Unit tests (.mjs), report (.md), execution output (.txt)
 │   └── integration/            Integration test page (.html, .js), report (.md), execution record (.txt)
-└── presentation-layer/         Stage 3 tests, reports, and outputs (none yet)
+└── presentation-layer/         Stage 3 tests (.html, .js), report (.md), execution output (.txt), and evidence screenshots
 ```
 
 - A test suite can have one shared report and one shared output file; each test case does not need its own.
@@ -706,7 +713,7 @@ The sequence follows dependencies: structure and styling first, then reading dat
 
 | Order | Implementation Stage                      | Status  | Depends On |
 | ----- | ----------------------------------------- | ------- | ---------- |
-| 3.1   | UI Structure and Styling                  | Planned | —          |
+| 3.1   | UI Structure and Styling                  | Completed (2026-11-15) | —   |
 | 3.2   | Task List and Application Layer Integration | Planned | 3.1        |
 | 3.3   | Create, Edit, Delete, and Status Interactions | Planned | 3.2    |
 | 3.4   | Stage-Level Verification and Responsive Check | Planned | 3.3   |
@@ -913,9 +920,60 @@ None. All Stage 3 planning decisions are now confirmed. Remaining implementation
 | Area                                   | Status                |
 | -------------------------------------- | --------------------- |
 | Planning                               | Completed             |
-| Implementation                         | Not Started           |
-| 3.1 UI Structure and Styling           | Planned               |
+| Implementation                         | In Progress           |
+| 3.1 UI Structure and Styling           | Completed             |
 | 3.2 Task List and Application Layer Integration | Planned      |
 | 3.3 Create, Edit, Delete, and Status Interactions | Planned    |
 | 3.4 Stage-Level Verification and Responsive Check | Planned    |
-| Testing                                | Not Started           |
+| Testing                                | In Progress (3.1 tests passed) |
+
+## Stage 3.1 Implementation and Testing
+
+**Status:** Completed (2026-11-15).
+
+**Objective:** Establish the dashboard layout and visual design with no data connection (see "3.1 UI Structure and Styling" in the Stage 3 plan).
+
+**Scope:** Static HTML, CSS, and JavaScript with mock data. No Firestore connection, no create, edit, delete, or status operations, and no changes to the Data Layer or Application Layer.
+
+**Official UI design reference:** `docs/design/Clean TaskFlow Dashboard Interface.png`
+
+**Implementation**
+
+- `index.html`: dashboard structure from the design reference: header, three summary cards, Add New Task card, Task List table, and hidden containers for feedback and list states (loading, empty, success, error).
+- `style.css`: styling with CSS variables, a system font stack, and inline SVG icons (no external fonts or libraries). Colours were sampled from the design reference. Responsive layouts use media queries at 900 px (tablet) and 600 px (mobile): on tablet the title field takes its own row; on mobile the summary cards and form stack and each task is shown as a card.
+- Mock data: 12 static tasks in `app.js`. The first five are the rows shown in the reference; the rest add a task with no due date and a very long title. The summary counts (12 total, 4 In Progress, 5 Completed) are calculated from them.
+- `app.js`: renders the 12 mock tasks, calculates the summary counts from them, formats due dates as "Mon D, YYYY" (local dates) or "No due date", and shows status indicators. The Add Task form, edit and delete icons are not functional yet (Stage 3.3). The `firebase.js` import was removed, so the Presentation Layer no longer touches the Data Layer.
+- The Data Layer and Application Layer were not modified.
+- Main files: modified `index.html`, `style.css`, `app.js`; new test files and evidence in `tests/presentation-layer/` (listed below).
+
+**T14 issue:** In Run 1 the mobile layout check (T14) failed. The cause was partly a too-strict check (cells are vertically centred) and partly a real defect: the edit and delete icons were left-aligned in a wide column instead of at the card's right edge. The CSS was fixed (`style.css`, actions cell right-aligned), the check was rewritten, and T14 passed in Run 2. Run 1's failure is kept in the records; no screenshot of the defect was saved.
+
+**Testing** (details in `testing-journal.md`, T09–T17)
+
+| Item           | Detail |
+| -------------- | ------ |
+| Test IDs       | T09–T17 |
+| Test Types     | Automated DOM and layout checks in the browser (T09–T16); manual visual review (T17) |
+| Execution Date | 2026-11-15 |
+| Actual Result  | Run 1: 7 of 8 automated checks passed; T14 (mobile layout) failed. After a layout fix and a stricter check, Run 2: 8 of 8 passed. T17 passed with noted differences. |
+| Widths Checked | 1280 px (desktop), 820 px (tablet), 390 px (mobile), in Chrome |
+| Data           | Mock data only; Firestore not used |
+
+| File                                                              | Purpose |
+| ----------------------------------------------------------------- | ------- |
+| `tests/presentation-layer/test-ui-structure.html`                 | Test page (run with the **Run UI Checks** button) |
+| `tests/presentation-layer/test-ui-structure.js`                   | Test source code |
+| `tests/presentation-layer/presentation-layer-ui-test-report.md`   | Test report |
+| `tests/presentation-layer/presentation-layer-ui-test-output.txt`  | Execution record (both runs) |
+| `tests/presentation-layer/evidence/`                              | Screenshots |
+
+**Completion:** Stage 3.1 is marked Completed because T09–T16 passed in the final run (8 of 8) and T17 passed with the noted differences. The next task is Stage 3.2 — Task List and Application Layer Integration, which remains Planned together with 3.3 and 3.4.
+
+**Remaining issues and limitations**
+
+- Responsiveness was checked at three widths in Chrome only (using iframes); other browsers, widths, and physical devices were not tested. The 900 px and 600 px breakpoints were chosen in this stage.
+- The visual comparison with the reference is a visual judgement: the system font replaces the reference typeface, and spacing, icons, and colours are close approximations.
+- The mock data has 12 rows (the reference shows 5) so that the counts match the reference and long titles and a missing due date can be checked. It is replaced by real data in Stage 3.2.
+- The due date field switches from text to a date picker on focus; the native picker was not checked in other browsers.
+- Keyboard navigation and screen reader behaviour were not formally tested.
+- `app.js` no longer prints the Firebase initialisation message used in T04. `firebase.js` is unchanged, and the Data Layer test pages in `tests/data-layer/` are unaffected.

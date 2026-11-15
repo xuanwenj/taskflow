@@ -1,0 +1,29 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Stage 3.1 UI Structure and Styling Test</title>
+    <style>
+      body { font-family: sans-serif; margin: 16px; }
+      pre { white-space: pre-wrap; background: #f4f4f4; padding: 12px; }
+      .preview { margin: 16px 0; }
+      .preview iframe { display: block; border: 2px solid #888; background: #fff; }
+    </style>
+  </head>
+  <body>
+    <h1>Stage 3.1 UI Structure and Styling Test</h1>
+    <p>
+      Loads the dashboard (<code>index.html</code>, mock data, no Firestore) in
+      iframes at desktop, tablet, and mobile widths and runs the structure,
+      layout, and readability checks. Results are shown below and in the
+      browser Developer Tools Console.
+    </p>
+
+    <button id="run">Run UI Checks</button>
+    <pre id="output"></pre>
+    <div id="previews"></div>
+
+    <script type="module" src="test-ui-structure.js"></script>
+  </body>
+</html>

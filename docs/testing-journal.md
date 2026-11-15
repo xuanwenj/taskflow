@@ -18,6 +18,15 @@ Records of tests and verification activities. Entries contain actual results onl
 | T06 | Read Tasks                      | Manual Functional Test | Passed |
 | T07 | Update Task                     | Manual Functional Test | Passed |
 | T08 | Delete Task                     | Manual Functional Test | Passed |
+| T09 | Dashboard Structure and Components | Automated DOM Check | Passed |
+| T10 | Status Indicators and Due Date Presentation | Automated DOM Check | Passed |
+| T11 | Text Readability (Contrast) | Automated DOM Check | Passed |
+| T12 | Desktop Layout (1280 px) | Automated Layout Check | Passed |
+| T13 | Tablet Layout (820 px) | Automated Layout Check | Passed |
+| T14 | Mobile Layout (390 px) | Automated Layout Check | Passed (failed in Run 1) |
+| T15 | Feedback Containers | Automated DOM Check | Passed |
+| T16 | No Firestore or Data Layer Access | Automated Check | Passed |
+| T17 | Visual Comparison with Design Reference | Manual Visual Review | Passed (with noted differences) |
 
 ### T01 — Firebase Project Setup
 
@@ -142,3 +151,125 @@ Records of tests and verification activities. Entries contain actual results onl
 - **Actual Result:** The task was successfully deleted, and a subsequent read confirmed that the record no longer existed.
 - **Status:** Passed.
 - **Note:** With T05–T07, this completes functional testing of all four Data Layer operations.
+
+## Stage 3.1 — UI Structure and Styling (Presentation Layer)
+
+Tests T09–T17 were executed on 2026-11-15 against the static dashboard (`index.html`, `style.css`, `app.js`) using mock data; Firestore was not used. The test code, report, execution record, and screenshots are in `tests/presentation-layer/` (`test-ui-structure.html/.js`, `presentation-layer-ui-test-report.md`, `presentation-layer-ui-test-output.txt`, `evidence/`). The full expected and actual results are in the report; the summaries below match it.
+
+**Testing environment**
+
+| Item | Detail |
+| ---- | ------ |
+| Execution date | 2026-11-15 |
+| Browser | Chrome (desktop) |
+| Server | `python3 -m http.server` from the project root, page at `tests/presentation-layer/test-ui-structure.html` |
+| Method | `index.html` loaded unchanged in iframes of fixed width so its own media queries respond; checks run from the **Run UI Checks** button |
+| Viewport widths | 1280 px (desktop), 820 px (tablet), 390 px (mobile); a second 1280 px iframe for the feedback containers (T15) |
+| Data | 12 static mock tasks; Firestore not used |
+| Design reference | `docs/design/Clean TaskFlow Dashboard Interface.png` |
+
+**Result overview:** Run 1: 7 of 8 automated checks passed (T14 failed). Run 2, after the T14 fix: 8 of 8 passed (T09–T16). T17 (manual visual review): passed with noted differences.
+
+**Records and evidence** (all in `tests/presentation-layer/`)
+
+- Report: `presentation-layer-ui-test-report.md`
+- Execution output (both runs): `presentation-layer-ui-test-output.txt`
+- Test page and code: `test-ui-structure.html`, `test-ui-structure.js`
+- Screenshots in `evidence/` (6): `dashboard-desktop.jpg` (T09, T17), `desktop-1280-preview.jpg` (T12), `tablet-820-preview.jpg` (T13), `mobile-390-top.jpg` and `mobile-390-task-list.jpg` (T14, after the fix), `feedback-states-preview.jpg` (T15). T10, T11 and T16 have no screenshot; their evidence is the execution output.
+- Missing evidence: no screenshot of the T14 defect from Run 1 was saved; the failure is recorded in the execution output only.
+
+### T09 — Dashboard Structure and Components
+
+- **Type:** Automated DOM Check (browser)
+- **Objective:** Verify that the dashboard contains the components shown in the design reference.
+- **Method:** Load `index.html` in an iframe and inspect the DOM from `test-ui-structure.js`.
+- **Expected Result:** Header, summary cards, Add New Task controls, Task List table and rows, and feedback containers are present.
+- **Actual Result:** Header, 3 summary cards, Add New Task controls, Task List table with 4 columns and 12 rows (status, due date, edit, delete in each), and hidden feedback containers are all present.
+- **Status:** Passed.
+- **Evidence:** `tests/presentation-layer/presentation-layer-ui-test-output.txt`; `evidence/dashboard-desktop.jpg`.
+
+### T10 — Status Indicators and Due Date Presentation
+
+- **Type:** Automated DOM Check (browser)
+- **Objective:** Verify status indicators, due date formatting, and summary counts.
+- **Method:** Inspect the rendered mock rows and summary cards.
+- **Expected Result:** Each status has its own indicator; due dates are shown as "Mon D, YYYY" or "No due date"; summary counts match the data.
+- **Actual Result:** Three distinct status colours; 11 dates in "Mon D, YYYY" format plus 1 "No due date"; summary counts 12/4/5 match the 12 mock rows.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-ui-test-output.txt`.
+
+### T11 — Text Readability (Contrast)
+
+- **Type:** Automated DOM Check (browser)
+- **Objective:** Verify that status indicators, titles, due dates, and labels are readable.
+- **Method:** Compute the contrast ratio of the rendered text colour against its background.
+- **Expected Result:** At least 4.5:1 for every checked element.
+- **Actual Result:** All at least 4.5:1 (lowest: Completed indicator 4.8:1; others 5.6:1 to 17.9:1).
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-ui-test-output.txt`.
+
+### T12 — Desktop Layout (1280 px)
+
+- **Type:** Automated Layout Check (browser)
+- **Objective:** Verify the desktop layout.
+- **Method:** Measure element positions in a 1280 px wide iframe.
+- **Expected Result:** Three summary cards in a row, one-row form, table list; no overflow or clipping.
+- **Actual Result:** No horizontal overflow or clipping. Summary cards in one row, form controls in one row, Task List shown as a table with a header row.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-ui-test-output.txt`; `evidence/desktop-1280-preview.jpg`.
+
+### T13 — Tablet Layout (820 px)
+
+- **Type:** Automated Layout Check (browser)
+- **Objective:** Verify the tablet layout.
+- **Method:** Measure element positions in an 820 px wide iframe.
+- **Expected Result:** Summary cards in a row, title field on its own row above date/status/button, table list; no overflow or clipping.
+- **Actual Result:** No horizontal overflow or clipping. Summary cards in one row, title field on its own full-width row with date, status and button below it, Task List still a table.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-ui-test-output.txt`; `evidence/tablet-820-preview.jpg`.
+
+### T14 — Mobile Layout (390 px)
+
+- **Type:** Automated Layout Check (browser)
+- **Objective:** Verify the mobile layout.
+- **Method:** Measure element positions in a 390 px wide iframe.
+- **Expected Result:** Stacked summary cards and form controls, task rows as cards; no overflow or clipping.
+- **Actual Result:**
+  - **Run 1: Failed.** The check reported "Row card layout is not title/actions above status/date."
+  - **Issue:** the check compared cell tops too strictly (the cells are vertically centred), and a real layout defect was also found: the edit and delete icons were left-aligned inside a wide column instead of at the card's right edge.
+  - **Resolution:** the actions cell in the mobile layout is now right-aligned in `style.css`, and the check now tests that cells share a line and that the icons are within 12 px of the right edge.
+  - **Run 2: Passed.** No horizontal overflow or clipping; summary cards and form controls stacked; each task shown as a card with the icons at the right edge.
+- **Status:** Passed (after fix).
+- **Evidence:** `presentation-layer-ui-test-output.txt` (both runs); `evidence/mobile-390-top.jpg`; `evidence/mobile-390-task-list.jpg` (after the fix).
+
+### T15 — Feedback Containers
+
+- **Type:** Automated DOM Check (browser)
+- **Objective:** Verify that the message areas for success, error, and loading/empty states are styled and fit the layout.
+- **Method:** Reveal the containers manually in a separate iframe and inspect them.
+- **Expected Result:** Visible, distinct, readable, and no overflow when shown.
+- **Actual Result:** All visible; success and error styled differently; error contrast at least 4.5:1; no overflow.
+- **Status:** Passed.
+- **Note:** The containers are not used by the app yet (Stages 3.2 and 3.3).
+- **Evidence:** `presentation-layer-ui-test-output.txt`; `evidence/feedback-states-preview.jpg`.
+
+### T16 — No Firestore or Data Layer Access
+
+- **Type:** Automated Check (browser)
+- **Objective:** Verify that the static Presentation Layer does not access Firebase or other layers in Stage 3.1.
+- **Method:** List the resources the page loaded, and check `app.js` and `index.html` for imports or references.
+- **Expected Result:** No Firebase requests and no Data Layer or Application Layer imports.
+- **Actual Result:** 2 resources loaded (none Firebase-related); `app.js` has no import statements; `index.html` references no Firebase or service module.
+- **Status:** Passed.
+- **Evidence:** `presentation-layer-ui-test-output.txt`.
+
+### T17 — Visual Comparison with Design Reference
+
+- **Type:** Manual Visual Review
+- **Objective:** Verify that the layout, hierarchy, colours, spacing, typography, and component styling follow the design reference as closely as reasonably possible.
+- **Method:** View `evidence/dashboard-desktop.jpg` next to `docs/design/Clean TaskFlow Dashboard Interface.png`.
+- **Expected Result:** The implementation follows the reference with no redesign or extra elements.
+- **Actual Result:** The structure and components, hierarchy, and palette match. Differences: system font stack instead of the reference typeface; spacing and row heights are close but not identical; icons are similar but redrawn; 12 mock rows instead of 5; colours are approximate.
+- **Status:** Passed (with noted differences).
+- **Note:** This is a visual judgement, not a pixel comparison.
+- **Evidence:** `evidence/dashboard-desktop.jpg`.

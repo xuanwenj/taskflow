@@ -1,0 +1,80 @@
+Stage 3.1 UI Structure and Styling — Execution Record
+=====================================================
+
+Test files:     tests/presentation-layer/test-ui-structure.html
+                tests/presentation-layer/test-ui-structure.js
+Page under test: index.html, style.css, app.js (mock data, no Firestore)
+Execution date: 2026-11-15
+Executed in:    Chrome, via the Claude in Chrome browser tools, with the project served
+                locally (python3 -m http.server 8000, http://127.0.0.1:8000/...).
+                The dashboard is loaded in iframes of 1280, 820, and 390 px width so
+                that its CSS media queries respond to those widths.
+
+The text below was read from the test page output ("Run UI Checks" button) after each run.
+Screenshots are saved in tests/presentation-layer/evidence/.
+
+======================================================================
+RUN 1 — T14 Failed
+======================================================================
+T09 [Pass] Dashboard structure and components
+  Actual: Header, 3 summary cards, Add New Task controls, Task List table with 4 columns and 12 rows (status, due date, edit, delete in each), and hidden feedback containers are all present.
+T10 [Pass] Status indicators and due date presentation
+  Actual: Three distinct status colours; 11 dates in "Mon D, YYYY" format plus 1 "No due date"; summary counts 12/4/5 match the 12 mock rows.
+T11 [Pass] Text readability (contrast)
+  Actual: Text/background contrast is at least 4.5:1 for every checked element (.status--todo 6.3:1, .status--in-progress 5.6:1, .status--completed 4.8:1, .task-title 17.9:1, .due-date:not(.due-date--none) 17.9:1, .due-date--none 6.4:1, .tagline 6.4:1, .summary-label 14.6:1).
+T12 [Pass] Desktop layout (1280px)
+  Actual: No horizontal overflow or clipping at 1280px. Summary cards in one row, Add New Task controls in one row, and the Task List shown as a table with a header row.
+T13 [Pass] Tablet layout (820px)
+  Actual: No horizontal overflow or clipping at 820px. Summary cards in one row, title field on its own full-width row with date, status and button below it, and the Task List still shown as a table.
+T14 [Fail] Mobile layout (390px)
+  Expected: Stacked summary cards and form controls, task rows as cards; no overflow or clipping.
+  Actual: Row card layout is not title/actions above status/date.
+T15 [Pass] Feedback containers
+  Actual: Success and error message styles and the loading/empty message area are visible, styled differently from each other, readable (error contrast at least 4.5:1), and cause no overflow when shown. (Manually revealed for this check; the containers are not used until Stage 3.2.)
+T16 [Pass] No Firestore or Data Layer access
+  Actual: The page loaded 2 resources (none Firebase-related); app.js has no import statements and index.html references no Firebase or service module.
+
+Summary: 7/8 passed.
+
+Investigation of the T14 failure (measured in the browser after Run 1):
+  - The original check combined three conditions in one message and required the title and
+    action cells to have (almost) the same top. They are vertically centred, so their tops
+    differed by 5-7 px. This part was a flaw in the check.
+  - Looking at the mobile preview also showed a real layout defect: in each task card the
+    edit and delete icons were left-aligned inside a wide column instead of sitting at the
+    card's right edge, and their position varied from row to row.
+
+Changes made after Run 1:
+  - style.css: added "justify-self: end" to the actions cell in the mobile layout.
+  - test-ui-structure.js: replaced the same-top check with a "shares a line" (vertical overlap)
+    check, split the combined condition into separate messages, and added a check that the
+    action icons are within 12 px of the right edge of the due date column.
+
+======================================================================
+RUN 2 — after the fix: 8/8 passed
+======================================================================
+T09 [Pass] Dashboard structure and components
+  Actual: Header, 3 summary cards, Add New Task controls, Task List table with 4 columns and 12 rows (status, due date, edit, delete in each), and hidden feedback containers are all present.
+T10 [Pass] Status indicators and due date presentation
+  Actual: Three distinct status colours; 11 dates in "Mon D, YYYY" format plus 1 "No due date"; summary counts 12/4/5 match the 12 mock rows.
+T11 [Pass] Text readability (contrast)
+  Actual: Text/background contrast is at least 4.5:1 for every checked element (.status--todo 6.3:1, .status--in-progress 5.6:1, .status--completed 4.8:1, .task-title 17.9:1, .due-date:not(.due-date--none) 17.9:1, .due-date--none 6.4:1, .tagline 6.4:1, .summary-label 14.6:1).
+T12 [Pass] Desktop layout (1280px)
+  Actual: No horizontal overflow or clipping at 1280px. Summary cards in one row, Add New Task controls in one row, and the Task List shown as a table with a header row.
+T13 [Pass] Tablet layout (820px)
+  Actual: No horizontal overflow or clipping at 820px. Summary cards in one row, title field on its own full-width row with date, status and button below it, and the Task List still shown as a table.
+T14 [Pass] Mobile layout (390px)
+  Actual: No horizontal overflow or clipping at 390px. Summary cards and form controls stacked, and each task shown as a card (title and actions above status and due date) with the table header visually hidden.
+T15 [Pass] Feedback containers
+  Actual: Success and error message styles and the loading/empty message area are visible, styled differently from each other, readable (error contrast at least 4.5:1), and cause no overflow when shown. (Manually revealed for this check; the containers are not used until Stage 3.2.)
+T16 [Pass] No Firestore or Data Layer access
+  Actual: The page loaded 2 resources (none Firebase-related); app.js has no import statements and index.html references no Firebase or service module.
+
+Summary: 8/8 passed.
+
+======================================================================
+T17 — Visual comparison with the design reference (manual)
+======================================================================
+Not part of the automated page output. Performed by viewing the saved screenshot
+evidence/dashboard-desktop.jpg next to docs/design/Clean TaskFlow Dashboard Interface.png.
+See the report for the observations and differences.
